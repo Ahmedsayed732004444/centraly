@@ -7,27 +7,21 @@ import { Input } from '@/shared/components/ui/Input';
 import { Label } from '@/shared/components/ui/Label';
 import { roleFormSchema, RoleFormData } from '../schemas/roleSchemas';
 import { usePermissions, useRole, useCreateRole, useUpdateRole } from '../hooks/useRoles';
-
 interface RoleFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   roleId?: string | null;
 }
-
 export function RoleFormModal({ isOpen, onClose, roleId }: RoleFormModalProps) {
   const { data: permissionsData = [] } = usePermissions();
   const { data: roleData, isLoading: isRoleLoading } = useRole(roleId || '');
-  
   const createMutation = useCreateRole();
   const updateMutation = useUpdateRole();
-
   const [groupedPermissions, setGroupedPermissions] = useState<Record<string, string[]>>({});
-
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm<RoleFormData>({
     resolver: zodResolver(roleFormSchema),
     defaultValues: { name: '', permissions: [] }
   });
-
   useEffect(() => {
     // Group permissions by prefix (e.g., 'sales:read' -> group 'sales')
     const grouped = permissionsData.reduce((acc, perm) => {
@@ -38,7 +32,6 @@ export function RoleFormModal({ isOpen, onClose, roleId }: RoleFormModalProps) {
     }, {} as Record<string, string[]>);
     setGroupedPermissions(grouped);
   }, [permissionsData]);
-
   useEffect(() => {
     if (roleData && roleId) {
       reset({
@@ -49,7 +42,6 @@ export function RoleFormModal({ isOpen, onClose, roleId }: RoleFormModalProps) {
       reset({ name: '', permissions: [] });
     }
   }, [roleData, roleId, reset]);
-
   const onSubmit = (data: RoleFormData) => {
     if (roleId) {
       updateMutation.mutate({ id: roleId, request: data }, {
@@ -61,19 +53,17 @@ export function RoleFormModal({ isOpen, onClose, roleId }: RoleFormModalProps) {
       });
     }
   };
-
   const footer = (
-    <div className="flex justify-end gap-2" dir="rtl">
-      <Button type="button" variant="outline" onClick={onClose}>إلغاء</Button>
-      <Button type="button" onClick={handleSubmit(onSubmit)} disabled={createMutation.isPending || updateMutation.isPending}>
+    <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2" dir="rtl">
+      <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto">إلغاء</Button>
+      <Button type="button" onClick={handleSubmit(onSubmit)} disabled={createMutation.isPending || updateMutation.isPending} className="w-full sm:w-auto">
         حفظ
       </Button>
     </div>
   );
-
   return (
-    <BaseModal 
-      isOpen={isOpen} 
+    <BaseModal
+      isOpen={isOpen}
       onClose={onClose}
       title={roleId ? 'تعديل الدور' : 'إضافة دور جديد'}
       size="2xl"
@@ -88,16 +78,14 @@ export function RoleFormModal({ isOpen, onClose, roleId }: RoleFormModalProps) {
               <Input {...register('name')} placeholder="مثال: مدير المبيعات" />
               {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
             </div>
-
             <div className="space-y-3">
               <Label className="text-base font-semibold border-b pb-2 block">الصلاحيات</Label>
               {errors.permissions && <p className="text-red-500 text-sm">{errors.permissions.message}</p>}
-              
               <Controller
                 name="permissions"
                 control={control}
                 render={({ field }) => (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     {Object.entries(groupedPermissions).map(([group, perms]) => (
                       <div key={group} className="bg-slate-50 p-4 rounded-lg border">
                         <h4 className="font-bold text-slate-700 capitalize mb-3">{group}</h4>
@@ -106,9 +94,9 @@ export function RoleFormModal({ isOpen, onClose, roleId }: RoleFormModalProps) {
                             const isChecked = field.value.includes(perm);
                             return (
                               <div key={perm} className="flex items-center gap-2">
-                                <input 
+                                <input
                                   type="checkbox"
-                                  id={perm} 
+                                  id={perm}
                                   checked={isChecked}
                                   onChange={(e) => {
                                     if (e.target.checked) {
@@ -117,9 +105,9 @@ export function RoleFormModal({ isOpen, onClose, roleId }: RoleFormModalProps) {
                                       field.onChange(field.value.filter(p => p !== perm));
                                     }
                                   }}
-                                  className="rounded border-gray-300 w-4 h-4 text-blue-600 focus:ring-blue-500"
+                                  className="rounded border-gray-300 w-4 h-4 text-blue-600 focus:ring-blue-500 shrink-0"
                                 />
-                                <label htmlFor={perm} className="cursor-pointer font-normal text-sm">
+                                <label htmlFor={perm} className="cursor-pointer font-normal text-sm break-all">
                                   {perm}
                                 </label>
                               </div>
@@ -137,4 +125,3 @@ export function RoleFormModal({ isOpen, onClose, roleId }: RoleFormModalProps) {
     </BaseModal>
   );
 }
-

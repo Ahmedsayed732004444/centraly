@@ -1,4 +1,4 @@
-﻿import { useForm, useWatch, useFieldArray } from 'react-hook-form';
+import { useForm, useWatch, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from "zod";
 import { useDepartments, useCategories } from '@/features/inventory/hooks/useInventory';
@@ -130,10 +130,10 @@ export function AddProductForm({ onSubmit, initialData, isSubmitting: _ }: AddPr
         <label className={tokens.font.label + " block mb-1.5"}>
           نوع المنتج (Usage) <span className="text-red-500">*</span>
         </label>
-        <select className={tokens.input} {...register('usage')}>
-          <option value="3">بيع أو صيانة</option>
-          <option value="1">بيع فقط</option>
-          <option value="2">صيانة فقط (قطع غيار داخلية)</option>
+        <select className={tokens.input} {...register('usage', { valueAsNumber: true })}>
+          <option value={3}>بيع أو صيانة</option>
+          <option value={1}>بيع فقط</option>
+          <option value={2}>صيانة فقط (قطع غيار داخلية)</option>
         </select>
         {errors.usage && (
           <p className="text-red-500 text-xs mt-1">{String(errors.usage.message)}</p>

@@ -4,15 +4,12 @@ import { BaseModal } from '@/shared/components/ui/BaseModal';
 import { addManualTransactionSchema, AddManualTransactionRequest } from '../schemas/financeSchemas';
 import { useAddDrawerTransaction } from '../hooks/useFinance';
 import { tokens } from '@/shared/styles/tokens';
-
 interface ManualTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
 export function ManualTransactionModal({ isOpen, onClose }: ManualTransactionModalProps) {
   const addTransaction = useAddDrawerTransaction();
-
   const {
     register,
     handleSubmit,
@@ -24,12 +21,9 @@ export function ManualTransactionModal({ isOpen, onClose }: ManualTransactionMod
     resolver: zodResolver(addManualTransactionSchema),
     defaultValues: { type: 1, category: 3, amount: 0, notes: '', source: '' }
   });
-
   const transactionType = watch('type');
-
   const onSubmit = (data: AddManualTransactionRequest) => {
-    // Override category just to be safe
-    data.category = 6; // 6 = Operational
+    data.category = 6;
     addTransaction.mutate(data, {
       onSuccess: () => {
         reset();
@@ -37,14 +31,12 @@ export function ManualTransactionModal({ isOpen, onClose }: ManualTransactionMod
       }
     });
   };
-
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} title="إضافة معاملة يدوية للدرج">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        
-        {/* Type Selection */}
-        <div className="grid grid-cols-2 gap-3">
-          <label 
+        {}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label
             onClick={() => { setValue('type', 1, { shouldValidate: true }); setValue('category', 3); }}
             className={`
             cursor-pointer rounded-xl border-2 p-4 text-center transition-all
@@ -53,7 +45,7 @@ export function ManualTransactionModal({ isOpen, onClose }: ManualTransactionMod
             <div className="font-semibold text-lg">إيداع نقدي</div>
             <div className="text-sm opacity-80 mt-1">إضافة فلوس للدرج</div>
           </label>
-          <label 
+          <label
             onClick={() => { setValue('type', 2, { shouldValidate: true }); setValue('category', 4); }}
             className={`
             cursor-pointer rounded-xl border-2 p-4 text-center transition-all
@@ -63,7 +55,6 @@ export function ManualTransactionModal({ isOpen, onClose }: ManualTransactionMod
             <div className="text-sm opacity-80 mt-1">أخذ فلوس من الدرج</div>
           </label>
         </div>
-
         <div>
           <label className={tokens.font.label + " block mb-1.5"}>المبلغ (ج.م)</label>
           <input
@@ -76,7 +67,6 @@ export function ManualTransactionModal({ isOpen, onClose }: ManualTransactionMod
           />
           {errors.amount && <p className="text-red-500 text-xs mt-1">{String(errors.amount.message)}</p>}
         </div>
-
         <div>
           <label className={tokens.font.label + " block mb-1.5"}>البيان / السبب</label>
           <input
@@ -86,15 +76,14 @@ export function ManualTransactionModal({ isOpen, onClose }: ManualTransactionMod
             placeholder="مثال: فكة إضافية، شراء شاي..."
           />
         </div>
-
-        <div className="flex justify-end gap-3 pt-4 mt-2">
-          <button type="button" onClick={onClose} className={tokens.btn.ghost}>
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 mt-2">
+          <button type="button" onClick={onClose} className={tokens.btn.ghost + " w-full sm:w-auto"}>
             إلغاء
           </button>
           <button
             type="submit"
             disabled={addTransaction.isPending}
-            className={tokens.btn.primary}
+            className={tokens.btn.primary + " w-full sm:w-auto"}
           >
             {addTransaction.isPending ? 'جاري الحفظ...' : 'حفظ المعاملة'}
           </button>
@@ -103,4 +92,3 @@ export function ManualTransactionModal({ isOpen, onClose }: ManualTransactionMod
     </BaseModal>
   );
 }
-

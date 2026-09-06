@@ -5,17 +5,14 @@ import { createExpenseSchema, CreateExpenseRequest } from '../schemas/financeSch
 import { useRecordExpense, useExpenseCategories } from '../hooks/useFinance';
 import { usePaymentSourcePrompt } from '../hooks/usePaymentSourcePrompt';
 import { tokens } from '@/shared/styles/tokens';
-
 interface CreateExpenseModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
 export function CreateExpenseModal({ isOpen, onClose }: CreateExpenseModalProps) {
   const recordExpense = useRecordExpense();
   const { data: categories } = useExpenseCategories();
-  const { promptPaymentSource, PaymentSourcePromptModal } = usePaymentSourcePrompt(9); // GlobalTransactionCategory.Expense
-
+  const { promptPaymentSource, PaymentSourcePromptModal } = usePaymentSourcePrompt(9);
   const {
     register,
     handleSubmit,
@@ -25,13 +22,10 @@ export function CreateExpenseModal({ isOpen, onClose }: CreateExpenseModalProps)
     resolver: zodResolver(createExpenseSchema),
     defaultValues: { categoryId: '', amount: 0, paymentSource: undefined, notes: '' }
   });
-
   const onSubmit = async (data: CreateExpenseRequest) => {
     const source = await promptPaymentSource();
     if (!source) return; // User closed the prompt
-    
     data.paymentSource = source;
-
     recordExpense.mutate(data, {
       onSuccess: () => {
         reset();
@@ -39,13 +33,11 @@ export function CreateExpenseModal({ isOpen, onClose }: CreateExpenseModalProps)
       }
     });
   };
-
   return (
     <>
       <PaymentSourcePromptModal />
       <BaseModal isOpen={isOpen} onClose={onClose} title="تسجيل مصروف جديد">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          
           <div>
             <label className={tokens.font.label + " block mb-1.5"}>بند المصروف</label>
             <select
@@ -59,7 +51,6 @@ export function CreateExpenseModal({ isOpen, onClose }: CreateExpenseModalProps)
             </select>
             {errors.categoryId && <p className="text-red-500 text-xs mt-1">{String(errors.categoryId.message)}</p>}
           </div>
-
           <div>
             <label className={tokens.font.label + " block mb-1.5"}>المبلغ (ج.م)</label>
             <input
@@ -72,7 +63,6 @@ export function CreateExpenseModal({ isOpen, onClose }: CreateExpenseModalProps)
             />
             {errors.amount && <p className="text-red-500 text-xs mt-1">{String(errors.amount.message)}</p>}
           </div>
-
           <div>
             <label className={tokens.font.label + " block mb-1.5"}>البيان / الملاحظات</label>
             <input
@@ -82,9 +72,8 @@ export function CreateExpenseModal({ isOpen, onClose }: CreateExpenseModalProps)
               placeholder="مثال: فاتورة كهرباء شهر أغسطس..."
             />
           </div>
-
-          <div className="flex justify-end gap-3 pt-4 mt-2">
-            <button type="button" onClick={onClose} className={tokens.btn.ghost}>
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 mt-2">
+            <button type="button" onClick={onClose} className={tokens.btn.ghost + " w-full sm:w-auto"}>
               إلغاء
             </button>
             <button

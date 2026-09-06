@@ -11,18 +11,15 @@ import { useHeaderStore } from '@/shared/hooks/useHeaderStore';
 import { useNavigate } from 'react-router-dom';
 import { WalletResponse } from '../schemas/walletSchemas';
 import { GlobalWalletOperationsTable } from '../components/GlobalWalletOperationsTable';
-
 const walletFormSchema = z.object({
   name: z.string().min(1, 'اسم المحفظة مطلوب'),
-  phoneNumber: z.string().min(1, 'رقم التليفون مطلوب'), 
+  phoneNumber: z.string().min(1, 'رقم التليفون مطلوب'),
   ownerName: z.string().optional(),
   initialBalance: z.coerce.number().min(0, 'يجب أن يكون الرصيد 0 أو أكثر').optional(),
   isActive: z.boolean(),
   image: z.any().optional()
 });
-
 type WalletFormValues = z.infer<typeof walletFormSchema>;
-
 export function WalletsAdminPage() {
   const { setTitle } = useHeaderStore();
   const navigate = useNavigate();
@@ -30,22 +27,18 @@ export function WalletsAdminPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingWallet, setEditingWallet] = useState<WalletResponse | null>(null);
   const [activeTab, setActiveTab] = useState<'list' | 'history'>('list');
-
   useEffect(() => {
     setTitle('إدارة المحافظ');
   }, [setTitle]);
-
   const form = useForm<WalletFormValues>({
     resolver: zodResolver(walletFormSchema) as any,
     defaultValues: { name: '', phoneNumber: '', ownerName: '', initialBalance: 0, isActive: true }
   });
-
   const openCreateDrawer = () => {
     setEditingWallet(null);
     form.reset({ name: '', phoneNumber: '', ownerName: '', initialBalance: 0, isActive: true });
     setIsDrawerOpen(true);
   };
-
   const openEditDrawer = (wallet: WalletResponse, e: React.MouseEvent) => {
     e.stopPropagation();
     setEditingWallet(wallet);
@@ -58,11 +51,10 @@ export function WalletsAdminPage() {
     });
     setIsDrawerOpen(true);
   };
-
   const onSubmit = (data: WalletFormValues) => {
     if (editingWallet) {
       updateWallet(
-        { 
+        {
           walletId: editingWallet.id,
           data: {
             name: data.name,
@@ -76,10 +68,10 @@ export function WalletsAdminPage() {
       );
     } else {
       createWallet(
-        { 
-          name: data.name, 
-          phoneNumber: data.phoneNumber, 
-          ownerName: data.ownerName || undefined, 
+        {
+          name: data.name,
+          phoneNumber: data.phoneNumber,
+          ownerName: data.ownerName || undefined,
           initialBalance: data.initialBalance || 0,
           image: data.image?.[0]
         },
@@ -87,15 +79,12 @@ export function WalletsAdminPage() {
       );
     }
   };
-
   const closeDrawer = () => {
     setIsDrawerOpen(false);
     setEditingWallet(null);
     form.reset();
   };
-
   const isSaving = isCreating || isUpdating;
-
   const drawerFooter = (
     <>
       <button type="button" onClick={closeDrawer} className={tokens.btn.secondary}>
@@ -111,30 +100,27 @@ export function WalletsAdminPage() {
       </button>
     </>
   );
-
   return (
     <div className="space-y-6">
-      
       {/* Tabs */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-gray-200 overflow-x-auto">
         <button
           onClick={() => setActiveTab('list')}
-          className={`py-3 px-6 font-semibold text-sm border-b-2 transition-colors ${activeTab === 'list' ? 'border-[#0f8e4c] text-[#0f8e4c]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          className={`py-3 px-6 font-semibold text-sm border-b-2 transition-colors whitespace-nowrap ${activeTab === 'list' ? 'border-[#0f8e4c] text-[#0f8e4c]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
         >
           المحافظ
         </button>
         <button
           onClick={() => setActiveTab('history')}
-          className={`py-3 px-6 font-semibold text-sm border-b-2 transition-colors ${activeTab === 'history' ? 'border-[#0f8e4c] text-[#0f8e4c]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          className={`py-3 px-6 font-semibold text-sm border-b-2 transition-colors whitespace-nowrap ${activeTab === 'history' ? 'border-[#0f8e4c] text-[#0f8e4c]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
         >
           سجل العمليات الشامل
         </button>
       </div>
-
       {activeTab === 'list' && (
         <>
           <div className="flex justify-end">
-            <button 
+            <button
               onClick={openCreateDrawer}
               className={tokens.btn.primary + " flex items-center gap-2"}
             >
@@ -142,7 +128,6 @@ export function WalletsAdminPage() {
               محفظة جديدة
             </button>
           </div>
-
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {isLoading ? (
               <div className="p-8 text-center text-gray-500">جاري تحميل المحافظ...</div>
@@ -159,56 +144,56 @@ export function WalletsAdminPage() {
                 <table className="w-full text-sm text-right">
               <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
                 <tr>
-                  <th className="px-6 py-4 font-semibold">اسم المحفظة</th>
-                  <th className="px-6 py-4 font-semibold">رقم التليفون</th>
-                  <th className="px-6 py-4 font-semibold">اسم المالك</th>
-                  <th className="px-6 py-4 font-semibold">الرصيد الحالي</th>
-                  <th className="px-6 py-4 font-semibold">تاريخ الإنشاء</th>
-                  <th className="px-6 py-4 font-semibold">الحالة</th>
-                  <th className="px-6 py-4 font-semibold">إجراءات</th>
+                  <th className="px-6 py-4 font-semibold whitespace-nowrap">اسم المحفظة</th>
+                  <th className="px-6 py-4 font-semibold whitespace-nowrap">رقم التليفون</th>
+                  <th className="px-6 py-4 font-semibold whitespace-nowrap">اسم المالك</th>
+                  <th className="px-6 py-4 font-semibold whitespace-nowrap">الرصيد الحالي</th>
+                  <th className="px-6 py-4 font-semibold whitespace-nowrap">تاريخ الإنشاء</th>
+                  <th className="px-6 py-4 font-semibold whitespace-nowrap">الحالة</th>
+                  <th className="px-6 py-4 font-semibold whitespace-nowrap">إجراءات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {wallets.map(wallet => (
-                  <tr 
-                    key={wallet.id} 
+                  <tr
+                    key={wallet.id}
                     className="hover:bg-slate-50/50 cursor-pointer transition-colors"
                     onClick={() => navigate(`/wallets/${wallet.id}`)}
                   >
-                    <td className="px-6 py-4 font-medium text-slate-800">
+                    <td className="px-6 py-4 font-medium text-slate-800 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         {wallet.imageUrl ? (
-                          <img src={wallet.imageUrl.startsWith('http') ? wallet.imageUrl : `${import.meta.env.VITE_API_BASE_URL ?? 'https://localhost:7073'}${wallet.imageUrl}`} alt={wallet.name} className="w-8 h-8 rounded-full object-cover border border-gray-200" />
+                          <img src={wallet.imageUrl.startsWith('http') ? wallet.imageUrl : `${import.meta.env.VITE_API_BASE_URL ?? 'https://localhost:7073'}${wallet.imageUrl}`} alt={wallet.name} className="w-8 h-8 rounded-full object-cover border border-gray-200 shrink-0" />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
                             <Wallet size={16} />
                           </div>
                         )}
                         <span>{wallet.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-slate-500" dir="ltr">{wallet.phoneNumber}</td>
-                    <td className="px-6 py-4 text-slate-500">{wallet.ownerName || '-'}</td>
-                    <td className="px-6 py-4 font-bold text-[#0f8e4c] font-mono">
+                    <td className="px-6 py-4 text-slate-500 whitespace-nowrap" dir="ltr">{wallet.phoneNumber}</td>
+                    <td className="px-6 py-4 text-slate-500 whitespace-nowrap">{wallet.ownerName || '-'}</td>
+                    <td className="px-6 py-4 font-bold text-[#0f8e4c] font-mono whitespace-nowrap">
                       {wallet.balance.toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 text-slate-500">{formatDate(wallet.createdAt)}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-slate-500 whitespace-nowrap">{formatDate(wallet.createdAt)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${wallet.isActive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                         {wallet.isActive ? 'نشط' : 'غير نشط'}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <button 
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-1">
+                        <button
                           onClick={(e) => openEditDrawer(wallet, e)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           title="تعديل"
                         >
                           <Edit2 size={18} />
                         </button>
-                        <button 
-                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                        <button
+                          className="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
                           title="التفاصيل"
                         >
                           <Info size={18} />
@@ -224,11 +209,9 @@ export function WalletsAdminPage() {
       </div>
       </>
       )}
-
       {activeTab === 'history' && (
         <GlobalWalletOperationsTable />
       )}
-
       <RightDrawer
         isOpen={isDrawerOpen}
         onClose={closeDrawer}
@@ -266,7 +249,6 @@ export function WalletsAdminPage() {
               placeholder="مثال: أحمد محمد"
             />
           </div>
-          
           {!editingWallet && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">الرصيد الافتتاحي</label>
@@ -281,7 +263,6 @@ export function WalletsAdminPage() {
               )}
             </div>
           )}
-
           {editingWallet && (
             <div className="flex items-center gap-2 pt-2 pb-2">
               <input
@@ -295,7 +276,6 @@ export function WalletsAdminPage() {
               </label>
             </div>
           )}
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               صورة المحفظة {editingWallet ? '(اختياري - لعدم التغيير اتركها فارغة)' : '*'}
@@ -315,4 +295,3 @@ export function WalletsAdminPage() {
     </div>
   );
 }
-

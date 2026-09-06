@@ -5,7 +5,6 @@ import { formatCurrency } from '@/shared/utils/currency';
 import { Edit2, Trash2, Eye } from 'lucide-react';
 import { HasPermission } from '@/features/auth/components/HasPermission';
 import { Permissions } from '@/features/auth/schemas/permissions';
-
 interface CustomersTableProps {
   data?: PaginatedList<CustomerResponse>;
   isLoading: boolean;
@@ -16,7 +15,6 @@ interface CustomersTableProps {
   onDelete: (customer: CustomerResponse) => void;
   onRowClick: (customer: CustomerResponse) => void;
 }
-
 export function CustomersTable({
   data,
   isLoading,
@@ -43,8 +41,8 @@ export function CustomersTable({
       cell: (row: CustomerResponse) => {
         const balance = row.debtBalance || 0;
         if (balance === 0) return <span className="text-gray-500 font-medium">0 ج.م</span>;
-        if (balance > 0) return <span className="text-red-600 font-bold" dir="ltr">{formatCurrency(balance)}</span>; // owes us
-        return <span className="text-green-600 font-bold" dir="ltr">{formatCurrency(Math.abs(balance))} (مقدم)</span>; // we owe them
+        if (balance > 0) return <span className="text-red-600 font-bold" dir="ltr">{formatCurrency(balance)}</span>;
+        return <span className="text-green-600 font-bold" dir="ltr">{formatCurrency(Math.abs(balance))} (مقدم)</span>;
       },
     },
     {
@@ -54,11 +52,11 @@ export function CustomersTable({
     {
       header: 'إجراءات',
       cell: (row: CustomerResponse) => (
-        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
             onClick={() => onRowClick(row)}
-            className="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+            className="p-2.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
             title="كشف حساب / التفاصيل"
             aria-label="تفاصيل العميل"
           >
@@ -68,7 +66,7 @@ export function CustomersTable({
             <button
               type="button"
               onClick={() => onEdit(row)}
-              className="p-1.5 text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
+              className="p-2.5 text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
               title="تعديل"
               aria-label="تعديل العميل"
             >
@@ -77,7 +75,7 @@ export function CustomersTable({
             <button
               type="button"
               onClick={() => onDelete(row)}
-              className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+              className="p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
               title="حذف"
               aria-label="حذف العميل"
             >
@@ -88,7 +86,6 @@ export function CustomersTable({
       ),
     },
   ];
-
   return (
     <DataTable
       columns={columns}
@@ -104,4 +101,3 @@ export function CustomersTable({
     />
   );
 }
-

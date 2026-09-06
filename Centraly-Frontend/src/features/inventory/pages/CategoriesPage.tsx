@@ -7,7 +7,6 @@ import {
 } from '@/features/inventory/hooks/useInventory';
 import { CategoryResponse } from '@/features/inventory/schemas/inventorySchemas';
 import { tokens } from '@/shared/styles/tokens';
-import { Layers, Tag, Plus } from 'lucide-react';
 import { RightDrawer } from '@/shared/components/ui/RightDrawer';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -15,6 +14,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { DepartmentCard } from '@/features/inventory/components/DepartmentCard';
 import { DepartmentForm, CategoryForm, createDepartmentSchema, createCategorySchema } from '@/features/inventory/components/CategoryForms';
 import { ConfirmModal } from '@/shared/components/ui/ConfirmModal';
+import { CategoriesActionToolbar } from '@/features/inventory/components/CategoriesActionToolbar';
+import { CategoriesEmptyState } from '@/features/inventory/components/CategoriesEmptyState';
 
 export function CategoriesPage() {
   const [drawerMode, setDrawerMode] = useState<'department' | 'category'>('department');
@@ -144,26 +145,11 @@ export function CategoriesPage() {
 
   return (
     <div className="space-y-6">
-      
       {/* Actions */}
-      <div className="flex justify-end items-center bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <div className="flex gap-3">
-          <button 
-            onClick={() => openAddCategory()}
-            className={tokens.btn.secondary + " flex items-center gap-2"}
-          >
-            <Tag size={18} />
-            قسم فرعي جديد
-          </button>
-          <button 
-            onClick={openAddDepartment}
-            className={tokens.btn.primary + " flex items-center gap-2"}
-          >
-            <Layers size={18} />
-            قسم رئيسي جديد
-          </button>
-        </div>
-      </div>
+      <CategoriesActionToolbar
+        onAddDepartment={openAddDepartment}
+        onAddCategory={openAddCategory}
+      />
 
       {/* Loading State */}
       {(isLoadingDeps || isLoadingCats) && (
@@ -186,20 +172,7 @@ export function CategoriesPage() {
         ))}
 
         {departmentsData?.items && departmentsData.items.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
-            <div className="inline-flex w-16 h-16 rounded-full bg-blue-50 items-center justify-center text-blue-500 mb-4">
-              <Layers size={32} />
-            </div>
-            <h3 className="text-lg font-bold text-gray-800 mb-1">لا يوجد أي أقسام رئيسية</h3>
-            <p className="text-gray-500 mb-4">ابدأ بإضافة قسم رئيسي لتتمكن من تنظيم منتجاتك</p>
-            <button 
-              onClick={openAddDepartment}
-              className={tokens.btn.primary + " inline-flex items-center gap-2"}
-            >
-              <Plus size={18} />
-              إضافة قسم رئيسي
-            </button>
-          </div>
+          <CategoriesEmptyState onAddDepartment={openAddDepartment} />
         )}
       </div>
 

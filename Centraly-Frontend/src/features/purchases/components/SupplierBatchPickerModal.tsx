@@ -6,14 +6,12 @@ import { tokens } from '@/shared/styles/tokens';
 import { formatCurrency } from '@/shared/utils/currency';
 import { BaseModal } from '@/shared/components/ui/BaseModal';
 import { Spinner } from '@/shared/components/ui/Spinner';
-
 interface SupplierBatchPickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   supplierId: string;
   onSelectBatch: (batch: SupplierBatchResponse) => void;
 }
-
 export function SupplierBatchPickerModal({
   isOpen,
   onClose,
@@ -22,7 +20,6 @@ export function SupplierBatchPickerModal({
 }: SupplierBatchPickerModalProps) {
   const { data: batches, isLoading, error } = useSupplierBatches(supplierId);
   const [searchTerm, setSearchTerm] = useState('');
-
   const filteredBatches = useMemo(() => {
     if (!batches) return [];
     if (!searchTerm) return batches;
@@ -34,7 +31,6 @@ export function SupplierBatchPickerModal({
         b.productId.toLowerCase().includes(lower)
     );
   }, [batches, searchTerm]);
-
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} title="اختيار صنف من المورد" size="3xl">
       <div className="p-4 border-b border-[var(--color-border)] bg-[var(--color-page-bg)]">
@@ -49,7 +45,6 @@ export function SupplierBatchPickerModal({
           />
         </div>
       </div>
-
       <div className="p-4">
         {isLoading ? (
           <div className="flex items-center justify-center h-40">
@@ -69,25 +64,25 @@ export function SupplierBatchPickerModal({
               <button
                 type="button"
                 key={batch.batchId}
-                className="flex items-center justify-between p-4 bg-white border border-[var(--color-border)] rounded-lg hover:border-[var(--color-primary)] hover:shadow-sm transition-all text-right"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-white border border-[var(--color-border)] rounded-lg hover:border-[var(--color-primary)] hover:shadow-sm transition-all text-right w-full"
                 onClick={() => onSelectBatch(batch)}
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-indigo-50 text-[var(--color-primary)] rounded-lg flex items-center justify-center">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-12 h-12 bg-indigo-50 text-[var(--color-primary)] rounded-lg flex items-center justify-center shrink-0">
                     <Package size={24} />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-[var(--color-text-main)]">
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-[var(--color-text-main)] truncate">
                       {batch.productName || 'منتج غير معروف'}
                     </h3>
-                    <div className="flex items-center gap-3 mt-1 text-sm text-[var(--color-text-muted)]">
+                    <div className="flex items-center gap-3 mt-1 text-sm text-[var(--color-text-muted)] flex-wrap">
                       {batch.barcode && <span>{batch.barcode}</span>}
                       <span>•</span>
                       <span>شراء: {new Date(batch.dateReceived).toLocaleDateString('ar-EG')}</span>
                     </div>
                   </div>
                 </div>
-                <div className="text-left flex flex-col items-end gap-1">
+                <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1 shrink-0">
                   <div className="text-lg font-bold text-[var(--color-text-main)]">
                     {formatCurrency(batch.purchasePrice)}
                   </div>

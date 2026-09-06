@@ -1,14 +1,12 @@
 import { Search } from 'lucide-react';
 import { tokens } from '@/shared/styles/tokens';
-
 interface SalesHistorySearchBarProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
 }
-
 export function SalesHistorySearchBar({ searchValue, onSearchChange }: SalesHistorySearchBarProps) {
   return (
-    <div className="p-5 border-b border-gray-100 bg-gray-50 flex items-center gap-4">
+    <div className="p-3 sm:p-5 border-b border-gray-100 bg-gray-50 flex items-center gap-4">
       <div className="relative w-full md:w-96">
         <input
           type="text"

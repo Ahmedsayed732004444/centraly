@@ -1,4 +1,4 @@
-﻿import { apiClient } from "@/lib/axios";
+import { apiClient } from "@/lib/axios";
 import { IInventoryRepository } from "@/core/repositories/IInventoryRepository";
 import { PaginatedList } from "@/shared/types/pagination";
 import { 
@@ -64,6 +64,9 @@ export class InventoryRepository implements IInventoryRepository {
     if (reqData.departmentId) formData.append('DepartmentId', reqData.departmentId);
     if (reqData.categoryId) formData.append('CategoryId', reqData.categoryId);
     formData.append('MinQuantityAlert', reqData.minQuantityAlert.toString());
+    if (reqData.usage !== undefined && reqData.usage !== null) {
+      formData.append('Usage', reqData.usage.toString());
+    }
     if (reqData.storageLocation) formData.append('StorageLocation', reqData.storageLocation);
     if (reqData.image instanceof File) {
       formData.append('Image', reqData.image);
@@ -88,6 +91,9 @@ export class InventoryRepository implements IInventoryRepository {
     if (reqData.departmentId) formData.append('DepartmentId', reqData.departmentId);
     if (reqData.categoryId) formData.append('CategoryId', reqData.categoryId);
     formData.append('MinQuantityAlert', reqData.minQuantityAlert.toString());
+    if (reqData.usage !== undefined && reqData.usage !== null) {
+      formData.append('Usage', reqData.usage.toString());
+    }
     if (reqData.storageLocation) formData.append('StorageLocation', reqData.storageLocation);
     if (reqData.image instanceof File) {
       formData.append('Image', reqData.image);

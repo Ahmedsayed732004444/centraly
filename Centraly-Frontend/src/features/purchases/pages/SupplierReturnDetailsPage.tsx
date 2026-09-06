@@ -7,14 +7,11 @@ import { tokens } from '@/shared/styles/tokens';
 import { formatCurrency } from '@/shared/utils/currency';
 import { Spinner } from '@/shared/components/ui/Spinner';
 import { RETURN_REASON_LABELS, RETURN_REASON_COLORS } from '../schemas/supplierReturnSchemas';
-
 export function SupplierReturnDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { setTitle, setBackButton } = useHeaderStore();
-
   const { data: returnData, isLoading, error } = useSupplierReturn(id!);
-
   useEffect(() => {
     if (returnData) {
       setTitle(`مرتجع #${returnData.supplierReturnId.substring(0, 8)}`);
@@ -23,7 +20,6 @@ export function SupplierReturnDetailsPage() {
     }
     setBackButton(true, '/purchases/returns');
   }, [returnData, setTitle, setBackButton]);
-
   if (isLoading) {
     return (
       <div className="p-6 h-screen bg-gray-50">
@@ -36,7 +32,6 @@ export function SupplierReturnDetailsPage() {
       </div>
     );
   }
-
   if (error || !returnData) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
@@ -48,12 +43,11 @@ export function SupplierReturnDetailsPage() {
       </div>
     );
   }
-
   return (
     <div className="space-y-5 w-full">
-      {/* Top bar */}
+      {}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <span className="text-gray-500 text-sm flex items-center gap-1.5">
             <Clock size={16} />
             {new Intl.DateTimeFormat('ar-EG', { dateStyle: 'full', timeStyle: 'short' }).format(new Date(returnData.returnDate))}
@@ -63,10 +57,9 @@ export function SupplierReturnDetailsPage() {
           </span>
         </div>
       </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Supplier */}
+      {}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {}
         <div
           className={`${tokens.card} p-4 cursor-pointer hover:border-blue-300 hover:shadow-md transition-all group`}
           onClick={() => returnData.supplier?.id && navigate(`/contacts/suppliers/${returnData.supplier.id}`)}
@@ -87,23 +80,20 @@ export function SupplierReturnDetailsPage() {
             <ChevronLeft size={14} className="text-gray-300 group-hover:text-blue-400 transition-colors flex-shrink-0" />
           </div>
         </div>
-
-        {/* Total Amount */}
+        {}
         <div className={`${tokens.card} p-4 flex flex-col justify-center`}>
           <p className="text-xs text-gray-500 mb-1">إجمالي المرتجع</p>
           <p className="text-xl font-bold text-gray-900">{formatCurrency(returnData.totalReturnedAmount)}</p>
         </div>
       </div>
-
-      {/* Notes */}
+      {}
       {returnData.notes && (
         <div className={`${tokens.card} p-4 border-r-4 border-blue-400 bg-blue-50`}>
           <p className="text-xs text-blue-600 font-semibold mb-1">ملاحظات المرتجع</p>
           <p className="text-gray-700 text-sm">{returnData.notes}</p>
         </div>
       )}
-
-      {/* Items Table */}
+      {}
       <div className={tokens.card}>
         <div className="p-4 border-b border-gray-100">
           <h2 className="font-bold text-gray-800">
@@ -111,15 +101,14 @@ export function SupplierReturnDetailsPage() {
             <span className="mr-2 text-sm font-normal text-gray-400">({returnData.items?.length || 0} صنف)</span>
           </h2>
         </div>
-
         <div className="overflow-x-auto">
-          <table className="w-full text-right text-sm">
+          <table className="w-full min-w-[640px] text-right text-sm">
             <thead>
               <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide border-b border-gray-100">
-                <th className="px-5 py-3 font-semibold">الصنف</th>
-                <th className="px-5 py-3 font-semibold text-center">الكمية</th>
-                <th className="px-5 py-3 font-semibold text-center">سعر الإرجاع (للوحدة)</th>
-                <th className="px-5 py-3 font-semibold text-left">الإجمالي</th>
+                <th className="px-5 py-3 font-semibold whitespace-nowrap">الصنف</th>
+                <th className="px-5 py-3 font-semibold text-center whitespace-nowrap">الكمية</th>
+                <th className="px-5 py-3 font-semibold text-center whitespace-nowrap">سعر الإرجاع (للوحدة)</th>
+                <th className="px-5 py-3 font-semibold text-left whitespace-nowrap">الإجمالي</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -131,15 +120,15 @@ export function SupplierReturnDetailsPage() {
                         <img
                           src={item.product.imageUrl}
                           alt={item.product.name ?? ''}
-                          className="w-10 h-10 rounded-lg object-cover border border-gray-100"
+                          className="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
+                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 shrink-0">
                           <Package size={18} />
                         </div>
                       )}
                       <div>
-                        <p className="font-semibold text-gray-800">{item.product?.name || 'â€”'}</p>
+                        <p className="font-semibold text-gray-800">{item.product?.name || '—'}</p>
                         {item.product?.barcode && (
                           <p className="text-xs text-gray-400 dir-ltr mt-0.5">{item.product.barcode}</p>
                         )}
@@ -176,5 +165,3 @@ export function SupplierReturnDetailsPage() {
     </div>
   );
 }
-
-

@@ -2,35 +2,30 @@ import { tokens } from '@/shared/styles/tokens';
 import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { useSuppliers } from '@/features/suppliers/hooks/useSuppliers';
-
 interface PurchasesFiltersProps {
   onSearch: (searchTerm: string) => void;
   onSupplierChange: (supplierId: string) => void;
   onDateChange: (startDate: string, endDate: string) => void;
 }
-
 export function PurchasesFilters({ onSearch, onSupplierChange, onDateChange }: PurchasesFiltersProps) {
   const [term, setTerm] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  
   const { data: suppliersData } = useSuppliers({ pageNumber: 1, pageSize: 500 });
   const suppliers = suppliersData?.items || [];
-
   const handleDateChange = (start: string, end: string) => {
     setStartDate(start);
     setEndDate(end);
     onDateChange(start, end);
   };
-
   return (
-    <div className={`${tokens.card} p-4 bg-white flex flex-col lg:flex-row gap-4 justify-between items-center mb-6`}>
-      <div className="relative w-full lg:w-96">
+    <div className={`${tokens.card} p-4 bg-white flex flex-col md:flex-row gap-4 md:justify-between md:items-center mb-6`}>
+      <div className="relative w-full md:w-80">
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
         <input
           type="text"
           placeholder="ابحث برقم الفاتورة..."
-          className={`${tokens.input} pl-3 pr-10`}
+          className={`${tokens.input} pl-3 pr-10 w-full`}
           value={term}
           onChange={(e) => {
             setTerm(e.target.value);
@@ -38,10 +33,9 @@ export function PurchasesFilters({ onSearch, onSupplierChange, onDateChange }: P
           }}
         />
       </div>
-
-      <div className="flex flex-col md:flex-row w-full lg:w-auto gap-4">
+      <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 sm:gap-4">
         <select
-          className={tokens.input}
+          className={`${tokens.input} w-full sm:w-auto`}
           onChange={(e) => onSupplierChange(e.target.value)}
         >
           <option value="">كل الموردين</option>
@@ -49,19 +43,19 @@ export function PurchasesFilters({ onSearch, onSupplierChange, onDateChange }: P
             <option key={s.supplierId} value={s.supplierId}>{s.name}</option>
           ))}
         </select>
-
-        <div className="flex items-center gap-2">
-          <input 
-            type="date" 
-            className={tokens.input} 
+        {/* Date range stacks on phones so both inputs stay fully usable instead of being squeezed side by side */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+          <input
+            type="date"
+            className={`${tokens.input} w-full sm:w-auto`}
             value={startDate}
             onChange={(e) => handleDateChange(e.target.value, endDate)}
             title="من تاريخ"
           />
-          <span className="text-gray-500">-</span>
-          <input 
-            type="date" 
-            className={tokens.input} 
+          <span className="text-gray-500 hidden sm:inline">-</span>
+          <input
+            type="date"
+            className={`${tokens.input} w-full sm:w-auto`}
             value={endDate}
             onChange={(e) => handleDateChange(startDate, e.target.value)}
             title="إلى تاريخ"

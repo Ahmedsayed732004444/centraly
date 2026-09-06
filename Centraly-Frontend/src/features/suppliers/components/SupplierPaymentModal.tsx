@@ -7,19 +7,15 @@ import { usePaymentSourcePrompt } from '@/features/finance/hooks/usePaymentSourc
 import { tokens } from '@/shared/styles/tokens';
 import { formatCurrency } from '@/shared/utils/currency';
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
-
 interface SupplierPaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   supplier: SupplierResponse;
 }
-
 export function SupplierPaymentModal({ isOpen, onClose, supplier }: SupplierPaymentModalProps) {
   const createPayment = useCreateSupplierPayment();
   const defaultIsReceipt = supplier.debtBalance < 0;
-  
   const { promptPaymentSource, PaymentSourcePromptModal } = usePaymentSourcePrompt();
-
   const {
     register,
     handleSubmit,
@@ -28,27 +24,23 @@ export function SupplierPaymentModal({ isOpen, onClose, supplier }: SupplierPaym
     formState: { errors },
   } = useForm<any>({
     resolver: zodResolver(createSupplierPaymentSchema),
-    defaultValues: { 
-      supplierId: supplier.supplierId, 
-      amount: Math.abs(supplier.debtBalance) > 0 ? Math.abs(supplier.debtBalance) : 0, 
+    defaultValues: {
+      supplierId: supplier.supplierId,
+      amount: Math.abs(supplier.debtBalance) > 0 ? Math.abs(supplier.debtBalance) : 0,
       notes: '',
       isReceipt: defaultIsReceipt
     }
   });
-
   const onSubmit = async (data: any) => {
     // Determine category based on receipt or payment
     const categoryId = data.isReceipt ? 6 : 5; // SupplierReceipt or SupplierPayment
-    
     const source = await promptPaymentSource(categoryId);
     if (!source) return;
-
     const finalData = {
       ...data,
       amount: data.isReceipt ? -Math.abs(data.amount) : Math.abs(data.amount),
       paymentSource: source
     };
-
     createPayment.mutate(finalData, {
       onSuccess: () => {
         reset();
@@ -56,27 +48,24 @@ export function SupplierPaymentModal({ isOpen, onClose, supplier }: SupplierPaym
       }
     });
   };
-
   return (
     <>
       <PaymentSourcePromptModal />
       <BaseModal isOpen={isOpen} onClose={onClose} title={`تسوية حساب مع المورد: ${supplier.name}`}>
-        <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded-xl flex justify-between items-center">
+        <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded-xl flex flex-wrap justify-between items-center gap-2">
           <span className="text-gray-600 font-semibold">إجمالي الرصيد الحالي للمورد:</span>
-          <span className={`text-xl font-bold ${supplier.debtBalance > 0 ? 'text-green-600' : supplier.debtBalance < 0 ? 'text-red-600' : 'text-gray-900'}`}>
+          <span className={`text-xl font-bold break-all ${supplier.debtBalance > 0 ? 'text-green-600' : supplier.debtBalance < 0 ? 'text-red-600' : 'text-gray-900'}`}>
             {formatCurrency(supplier.debtBalance)}
           </span>
         </div>
-
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          
           <div>
             <label className={tokens.font.label + " block mb-2"}>نوع العملية</label>
             <Controller
               name="isReceipt"
               control={control}
               render={({ field }) => (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => field.onChange(false)}
@@ -89,7 +78,6 @@ export function SupplierPaymentModal({ isOpen, onClose, supplier }: SupplierPaym
                     <ArrowUpRight size={18} className={!field.value ? 'text-green-600' : 'text-gray-400'} />
                     <span>دفع (تسديد للمورد)</span>
                   </button>
-
                   <button
                     type="button"
                     onClick={() => field.onChange(true)}
@@ -106,7 +94,6 @@ export function SupplierPaymentModal({ isOpen, onClose, supplier }: SupplierPaym
               )}
             />
           </div>
-
           <div>
             <label className={tokens.font.label + " block mb-1.5"}>المبلغ (ج.م)</label>
             <input
@@ -119,7 +106,6 @@ export function SupplierPaymentModal({ isOpen, onClose, supplier }: SupplierPaym
             />
             {errors.amount && <p className="text-red-500 text-xs mt-1">{String(errors.amount.message)}</p>}
           </div>
-
           <div>
             <label className={tokens.font.label + " block mb-1.5"}>ملاحظات</label>
             <input
@@ -129,15 +115,14 @@ export function SupplierPaymentModal({ isOpen, onClose, supplier }: SupplierPaym
               placeholder="مثال: دفعة نقدية أو استرداد نقدي..."
             />
           </div>
-
-          <div className="flex justify-end gap-3 pt-4 mt-2">
-            <button type="button" onClick={onClose} className={tokens.btn.ghost}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 mt-2">
+            <button type="button" onClick={onClose} className={tokens.btn.ghost + " w-full sm:w-auto"}>
               إلغاء
             </button>
             <button
               type="submit"
               disabled={createPayment.isPending}
-              className={tokens.btn.primary}
+              className={tokens.btn.primary + " w-full sm:w-auto"}
             >
               {createPayment.isPending ? 'جاري الحفظ...' : 'حفظ العملية'}
             </button>

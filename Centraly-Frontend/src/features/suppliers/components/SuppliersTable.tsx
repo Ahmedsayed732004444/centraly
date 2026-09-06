@@ -5,8 +5,6 @@ import { SupplierResponse } from '../schemas/supplierSchemas';
 import { PaginatedList } from '@/shared/types/pagination';
 import { HasPermission } from '@/features/auth/components/HasPermission';
 import { Permissions } from '@/features/auth/schemas/permissions';
-
-
 interface SuppliersTableProps {
   data?: PaginatedList<SupplierResponse>;
   isLoading: boolean;
@@ -18,7 +16,6 @@ interface SuppliersTableProps {
   onPay?: (supplier: SupplierResponse) => void;
   onRowClick?: (supplier: SupplierResponse) => void;
 }
-
 export function SuppliersTable({
   data,
   isLoading,
@@ -34,13 +31,13 @@ export function SuppliersTable({
     {
       header: 'اسم المورد',
       cell: (row: SupplierResponse) => (
-        <span className="text-base font-bold text-gray-900">{row.name}</span>
+        <span className="text-base font-bold text-gray-900 whitespace-nowrap">{row.name}</span>
       ),
     },
     {
       header: 'الهاتف',
       cell: (row: SupplierResponse) => (
-        <span className="text-sm font-semibold text-gray-600 font-mono bg-gray-50 px-2 py-1 rounded border border-gray-100" dir="ltr">
+        <span className="text-sm font-semibold text-gray-600 font-mono bg-gray-50 px-2 py-1 rounded border border-gray-100 whitespace-nowrap" dir="ltr">
           {row.phone || '---'}
         </span>
       ),
@@ -48,8 +45,8 @@ export function SuppliersTable({
     {
       header: 'الرصيد المستحق',
       cell: (row: SupplierResponse) => (
-        <div className="flex items-center gap-3">
-          <span className={`text-base font-bold ${row.debtBalance > 0 ? 'text-green-600' : row.debtBalance < 0 ? 'text-red-600' : 'text-gray-900'}`}>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`text-base font-bold whitespace-nowrap ${row.debtBalance > 0 ? 'text-green-600' : row.debtBalance < 0 ? 'text-red-600' : 'text-gray-900'}`}>
             {formatCurrency(row.debtBalance)}
           </span>
           {row.debtBalance !== 0 && onPay && (
@@ -58,9 +55,9 @@ export function SuppliersTable({
                 e.stopPropagation();
                 onPay(row);
               }}
-              className={`text-xs px-2 py-1 rounded flex items-center gap-1 border transition-colors ${
-                row.debtBalance > 0 
-                  ? 'bg-green-50 text-green-700 hover:bg-green-100 border-green-200' 
+              className={`text-xs px-2 py-1 rounded flex items-center gap-1 border transition-colors whitespace-nowrap ${
+                row.debtBalance > 0
+                  ? 'bg-green-50 text-green-700 hover:bg-green-100 border-green-200'
                   : 'bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200'
               }`}
               title={row.debtBalance > 0 ? "تسديد دفعة" : "استلام دفعة"}
@@ -87,7 +84,7 @@ export function SuppliersTable({
     {
       header: 'الإجراءات',
       cell: (row: SupplierResponse) => (
-        <div className="flex justify-center gap-3 text-gray-400">
+        <div className="flex justify-center gap-1 text-gray-400">
           <HasPermission permission={Permissions.SuppliersWrite}>
             <button
               type="button"
@@ -95,7 +92,7 @@ export function SuppliersTable({
                 e.stopPropagation();
                 onEdit?.(row);
               }}
-              className="hover:text-blue-500 transition-colors p-2 rounded-lg hover:bg-blue-50"
+              className="hover:text-blue-500 transition-colors p-2.5 rounded-lg hover:bg-blue-50"
               title="تعديل"
               aria-label="تعديل المورد"
             >
@@ -107,7 +104,7 @@ export function SuppliersTable({
                 e.stopPropagation();
                 onDelete?.(row);
               }}
-              className="hover:text-red-500 transition-colors p-2 rounded-lg hover:bg-red-50"
+              className="hover:text-red-500 transition-colors p-2.5 rounded-lg hover:bg-red-50"
               title="حذف"
               aria-label="حذف المورد"
             >
@@ -118,7 +115,6 @@ export function SuppliersTable({
       ),
     },
   ];
-
   return (
     <DataTable
       columns={columns}
@@ -134,4 +130,3 @@ export function SuppliersTable({
     />
   );
 }
-

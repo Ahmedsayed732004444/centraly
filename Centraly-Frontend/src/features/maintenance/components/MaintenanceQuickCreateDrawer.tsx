@@ -7,21 +7,19 @@ import { useCustomers } from '@/features/contacts/hooks/useContacts';
 import { RightDrawer as Drawer } from '@/shared/components/ui/RightDrawer';
 import { Input } from '@/shared/components/ui/Input';
 import { tokens } from '@/shared/styles/tokens';
-import { 
-  User, 
-  Smartphone, 
-  Clock, 
-  Coins, 
-  Save, 
+import {
+  User,
+  Smartphone,
+  Clock,
+  Coins,
+  Save,
   Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
 interface Props {
   isOpen: boolean;
   onClose: () => void;
 }
-
 const TIME_PRESETS = [
   { label: '30 دقيقة', minutes: 30 },
   { label: 'ساعة', minutes: 60 },
@@ -29,48 +27,38 @@ const TIME_PRESETS = [
   { label: '3 ساعات', minutes: 180 },
   { label: 'غداً', minutes: 1440 },
 ];
-
 const COMMON_PROBLEMS = [
-  'تغيير شاشة', 'تغيير بطارية', 'سوكيت شحن', 'باغة', 
+  'تغيير شاشة', 'تغيير بطارية', 'سوكيت شحن', 'باغة',
   'صيانة بوردة', 'سوفت وير', 'سماعة / مايك', 'فحص وكشف'
 ];
-
 const ADVANCE_PRESETS = [0, 50, 100, 200];
-
 function toLocalDatetimeString(date: Date) {
   const pad = (n: number) => n.toString().padStart(2, '0');
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
-
 function formatArabicDelivery(isoString?: string) {
   if (!isoString) return null;
   const date = new Date(isoString);
   if (isNaN(date.getTime())) return null;
-
   const now = new Date();
   const isToday = date.toDateString() === now.toDateString();
   const tomorrow = new Date(now);
   tomorrow.setDate(tomorrow.getDate() + 1);
   const isTomorrow = date.toDateString() === tomorrow.toDateString();
-
   const timePart = date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true });
-
   if (isToday) return `اليوم، ${timePart}`;
   if (isTomorrow) return `غداً، ${timePart}`;
   return date.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', hour12: true });
 }
-
 export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
   const { mutate: createMaintenance, isPending } = useCreateMaintenance();
   const [activeTimePreset, setActiveTimePreset] = useState<number | 'custom' | null>(null);
   const [customerSearch, setCustomerSearch] = useState('');
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
-
   const { data: customersData } = useCustomers({
     searchValue: customerSearch.length >= 2 ? customerSearch : undefined,
     pageSize: 5,
   });
-
   const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm<CreateMaintenanceRequest>({
     resolver: zodResolver(createMaintenanceSchema) as any,
     defaultValues: {
@@ -78,11 +66,9 @@ export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
       deviceDescription: '', problem: '', paidAmount: 0, deliveryDate: '',
     },
   });
-
   const currentDeliveryDate = watch('deliveryDate');
   const currentProblem = watch('problem') || '';
   const currentPaid = watch('paidAmount');
-
   useEffect(() => {
     if (isOpen) {
       const defaultDate = new Date(Date.now() + 60 * 60 * 1000);
@@ -95,42 +81,35 @@ export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
       setShowCustomerDropdown(false);
     }
   }, [isOpen, reset]);
-
   const handleSelectPresetTime = (minutes: number) => {
     setActiveTimePreset(minutes);
     setValue('deliveryDate', toLocalDatetimeString(new Date(Date.now() + minutes * 60 * 1000)), { shouldValidate: true });
   };
-
   const handleAddProblemChip = (chip: string) => {
     if (!currentProblem.trim()) setValue('problem', chip, { shouldValidate: true });
     else if (!currentProblem.includes(chip)) setValue('problem', `${currentProblem} + ${chip}`, { shouldValidate: true });
   };
-
   const handleSelectCustomer = (customer: { customerId: string; name: string; phone?: string }) => {
     setValue('customerName', customer.name, { shouldValidate: true });
     setValue('customerPhone', customer.phone || '', { shouldValidate: true });
     setValue('customerId', customer.customerId, { shouldValidate: true });
     setShowCustomerDropdown(false);
   };
-
   const onSubmit = (data: CreateMaintenanceRequest) => {
     const payload = { ...data };
     if (!payload.deliveryDate) delete payload.deliveryDate;
     createMaintenance(payload, { onSuccess: () => onClose() });
   };
-
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} title="إضافة تذكرة صيانة" width="w-[500px]">
+    <Drawer isOpen={isOpen} onClose={onClose} title="إضافة تذكرة صيانة" width="w-[500px] max-w-full">
       <form onSubmit={handleSubmit(onSubmit as any)} className="h-full flex flex-col">
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8 bg-white">
-          
-          {/* Section 1: Customer */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 sm:py-6 space-y-8 bg-white">
+          {}
           <section className="space-y-4">
             <h3 className="flex items-center gap-2 text-[15px] font-bold text-slate-800">
               <User className="w-4 h-4 text-blue-600" /> معلومات العميل
             </h3>
-            
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="relative">
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5">اسم العميل <span className="text-red-500">*</span></label>
                 <Input
@@ -147,8 +126,7 @@ export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
                   className="bg-slate-50/50 border-slate-200 focus:bg-white transition-colors h-11"
                 />
                 {errors.customerName && <p className="text-red-500 text-[11px] mt-1">{errors.customerName.message}</p>}
-                
-                {/* Autocomplete Dropdown */}
+                {}
                 {showCustomerDropdown && customersData?.items && customersData.items.length > 0 && customerSearch.length >= 2 && (
                   <div className="absolute z-20 top-full mt-1 w-full bg-white rounded-xl border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
                     <div className="max-h-48 overflow-y-auto">
@@ -167,7 +145,6 @@ export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
                   </div>
                 )}
               </div>
-
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1.5">رقم الهاتف</label>
                 <Input
@@ -181,15 +158,12 @@ export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
               </div>
             </div>
           </section>
-
           <hr className="border-slate-100" />
-
-          {/* Section 2: Device & Problem */}
+          {}
           <section className="space-y-4">
             <h3 className="flex items-center gap-2 text-[15px] font-bold text-slate-800">
               <Smartphone className="w-4 h-4 text-blue-600" /> الجهاز والمشكلة
             </h3>
-            
             <div>
               <label className="block text-xs font-semibold text-slate-500 mb-1.5">اسم الجهاز / الموديل</label>
               <Input
@@ -198,15 +172,13 @@ export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
                 className="bg-slate-50/50 border-slate-200 focus:bg-white h-11"
               />
             </div>
-
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-xs font-semibold text-slate-500">تفاصيل العطل</label>
-                <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded flex items-center gap-1">
+                <span className="text-[10px] font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded flex items-center gap-1 shrink-0">
                   <Sparkles className="w-3 h-3" /> أضف سريعاً
                 </span>
               </div>
-              
               <div className="flex flex-wrap gap-1.5 mb-3">
                 {COMMON_PROBLEMS.map((chip) => (
                   <button
@@ -219,7 +191,6 @@ export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
                   </button>
                 ))}
               </div>
-
               <textarea
                 {...register('problem')}
                 placeholder="ملاحظات العميل أو تفاصيل الفحص السريع..."
@@ -227,26 +198,23 @@ export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
               />
             </div>
           </section>
-
           <hr className="border-slate-100" />
-
-          {/* Section 3: Delivery & Payment (Grouped) */}
+          {}
           <section className="space-y-6">
             <div>
               <h3 className="flex items-center gap-2 text-[15px] font-bold text-slate-800 mb-4">
                 <Clock className="w-4 h-4 text-blue-600" /> موعد التسليم المتوقع
               </h3>
-              
-              <div className="bg-slate-100/70 p-1.5 rounded-xl flex items-center gap-1 mb-3">
+              <div className="bg-slate-100/70 p-1.5 rounded-xl flex items-center gap-1 mb-3 overflow-x-auto">
                 {TIME_PRESETS.map((preset) => (
                   <button
                     type="button"
                     key={preset.minutes}
                     onClick={() => handleSelectPresetTime(preset.minutes)}
                     className={cn(
-                      "flex-1 py-2 text-xs font-semibold rounded-lg transition-all",
-                      activeTimePreset === preset.minutes 
-                        ? "bg-white text-blue-700 shadow-sm" 
+                      "flex-1 min-w-[62px] shrink-0 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap",
+                      activeTimePreset === preset.minutes
+                        ? "bg-white text-blue-700 shadow-sm"
                         : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/50"
                     )}
                   >
@@ -254,8 +222,7 @@ export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
                   </button>
                 ))}
               </div>
-              
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <Input
                   type="datetime-local"
                   {...register('deliveryDate')}
@@ -269,30 +236,28 @@ export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
                 )}
               </div>
             </div>
-
             <div>
               <h3 className="flex items-center gap-2 text-[15px] font-bold text-slate-800 mb-3">
                 <Coins className="w-4 h-4 text-emerald-600" /> الدفعة المقدمة (عربون)
               </h3>
-              
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <Input
                   type="number"
                   min="0"
                   step="0.01"
                   {...register('paidAmount', { valueAsNumber: true })} onFocus={(e) => e.target.select()}
-                  className="w-32 h-11 font-bold text-lg text-emerald-700 text-center bg-emerald-50/30 border-emerald-100 focus:border-emerald-500 focus:ring-emerald-500"
+                  className="w-full sm:w-32 h-11 font-bold text-lg text-emerald-700 text-center bg-emerald-50/30 border-emerald-100 focus:border-emerald-500 focus:ring-emerald-500"
                 />
-                <div className="flex-1 bg-slate-100/70 p-1 rounded-xl flex items-center gap-1">
+                <div className="flex-1 bg-slate-100/70 p-1 rounded-xl flex items-center gap-1 overflow-x-auto">
                   {ADVANCE_PRESETS.map((amt) => (
                     <button
                       type="button"
                       key={amt}
                       onClick={() => setValue('paidAmount', amt, { shouldValidate: true })}
                       className={cn(
-                        "flex-1 py-2 text-xs font-semibold rounded-lg transition-all",
-                        Number(currentPaid) === amt 
-                          ? "bg-emerald-600 text-white shadow-sm" 
+                        "flex-1 min-w-[54px] shrink-0 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap",
+                        Number(currentPaid) === amt
+                          ? "bg-emerald-600 text-white shadow-sm"
                           : "text-slate-500 hover:bg-slate-200/50"
                       )}
                     >
@@ -303,15 +268,13 @@ export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
               </div>
             </div>
           </section>
-
         </div>
-
-        {/* Footer */}
-        <div className="p-6 bg-white border-t border-slate-100 flex items-center gap-3 shrink-0">
+        {}
+        <div className="p-4 sm:p-6 bg-white border-t border-slate-100 flex items-center gap-3 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-3 rounded-xl font-semibold text-slate-500 hover:bg-slate-100 transition-colors"
+            className="px-4 sm:px-6 py-3 rounded-xl font-semibold text-slate-500 hover:bg-slate-100 transition-colors shrink-0"
           >
             إلغاء
           </button>
@@ -328,4 +291,3 @@ export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
     </Drawer>
   );
 }
-

@@ -4,16 +4,13 @@ import { BaseModal } from '@/shared/components/ui/BaseModal';
 import { addManualSafeTransactionSchema, AddManualSafeTransactionRequest } from '../schemas/financeSchemas';
 import { useAddManualSafeTransaction } from '../hooks/useFinance';
 import { tokens } from '@/shared/styles/tokens';
-
 interface ManualSafeTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
   safeId: string;
 }
-
 export function ManualSafeTransactionModal({ isOpen, onClose, safeId }: ManualSafeTransactionModalProps) {
   const addTransaction = useAddManualSafeTransaction();
-
   const {
     register,
     handleSubmit,
@@ -25,9 +22,7 @@ export function ManualSafeTransactionModal({ isOpen, onClose, safeId }: ManualSa
     resolver: zodResolver(addManualSafeTransactionSchema),
     defaultValues: { type: 1, category: 6, amount: 0, notes: '' }
   });
-
   const transactionType = watch('type');
-
   const onSubmit = (data: AddManualSafeTransactionRequest) => {
     addTransaction.mutate({ safeId, data }, {
       onSuccess: () => {
@@ -36,14 +31,12 @@ export function ManualSafeTransactionModal({ isOpen, onClose, safeId }: ManualSa
       }
     });
   };
-
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} title="إضافة معاملة يدوية للخزينة">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        
-        {/* Type Selection */}
-        <div className="grid grid-cols-2 gap-3">
-          <label 
+        {}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label
             onClick={() => { setValue('type', 1, { shouldValidate: true }); setValue('category', 6); }}
             className={`
             cursor-pointer rounded-xl border-2 p-4 text-center transition-all
@@ -51,7 +44,7 @@ export function ManualSafeTransactionModal({ isOpen, onClose, safeId }: ManualSa
           `}>
             <div className="font-semibold text-lg">إيداع نقدي</div>
           </label>
-          <label 
+          <label
             onClick={() => { setValue('type', 2, { shouldValidate: true }); setValue('category', 7); }}
             className={`
             cursor-pointer rounded-xl border-2 p-4 text-center transition-all
@@ -60,7 +53,6 @@ export function ManualSafeTransactionModal({ isOpen, onClose, safeId }: ManualSa
             <div className="font-semibold text-lg">سحب نقدي</div>
           </label>
         </div>
-
         <div>
           <label className={tokens.font.label + " block mb-1.5"}>المبلغ (ج.م)</label>
           <input
@@ -73,7 +65,6 @@ export function ManualSafeTransactionModal({ isOpen, onClose, safeId }: ManualSa
           />
           {errors.amount && <p className="text-red-500 text-xs mt-1">{String(errors.amount.message)}</p>}
         </div>
-
         <div>
           <label className={tokens.font.label + " block mb-1.5"}>البيان / السبب</label>
           <input
@@ -83,15 +74,14 @@ export function ManualSafeTransactionModal({ isOpen, onClose, safeId }: ManualSa
             placeholder="مثال: إيداع بنكي..."
           />
         </div>
-
-        <div className="flex justify-end gap-3 pt-4 mt-2">
-          <button type="button" onClick={onClose} className={tokens.btn.ghost}>
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 mt-2">
+          <button type="button" onClick={onClose} className={tokens.btn.ghost + " w-full sm:w-auto"}>
             إلغاء
           </button>
           <button
             type="submit"
             disabled={addTransaction.isPending}
-            className={tokens.btn.primary}
+            className={tokens.btn.primary + " w-full sm:w-auto"}
           >
             {addTransaction.isPending ? 'جاري الحفظ...' : 'حفظ المعاملة'}
           </button>
@@ -100,6 +90,3 @@ export function ManualSafeTransactionModal({ isOpen, onClose, safeId }: ManualSa
     </BaseModal>
   );
 }
-
-
-

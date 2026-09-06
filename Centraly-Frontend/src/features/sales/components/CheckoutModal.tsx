@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Phone, Banknote } from 'lucide-react';
 import { PaymentMethod, SaleType } from '../schemas/salesSchemas';
 import { PaymentSource } from '@/features/finance/schemas/financeSchemas';
@@ -6,7 +6,6 @@ import { usePaymentSourcePrompt } from '@/features/finance/hooks/usePaymentSourc
 import { tokens } from '@/shared/styles/tokens';
 import { formatCurrency } from '@/shared/utils/currency';
 import { BaseModal } from '@/shared/components/ui/BaseModal';
-
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -15,7 +14,6 @@ interface CheckoutModalProps {
   onConfirm: (customerName: string, customerPhone: string, paidAmount: number, paymentSource?: PaymentSource, saleType?: SaleType) => void;
   isSubmitting: boolean;
 }
-
 export function CheckoutModal({
   isOpen,
   onClose,
@@ -29,9 +27,7 @@ export function CheckoutModal({
   const [saleType, setSaleType] = useState<SaleType>(SaleType.Retail);
   const [paidAmount, setPaidAmount] = useState<number | string>(totalAmount);
   const [error, setError] = useState('');
-
   const { promptPaymentSource, PaymentSourcePromptModal, isPoliciesLoading } = usePaymentSourcePrompt(1); // GlobalTransactionCategory.CashSale
-
   useEffect(() => {
     if (isOpen) {
       setCustomerName('');
@@ -40,21 +36,16 @@ export function CheckoutModal({
       setError('');
     }
   }, [isOpen, paymentMethod, totalAmount]);
-
   if (!paymentMethod) return null;
-
   const isCredit = paymentMethod === PaymentMethod.Deferred;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
     const paid = Number(paidAmount);
     if (isNaN(paid) || paid < 0) {
       setError('يرجى إدخال مبلغ دفع صحيح');
       return;
     }
-
     if (isCredit) {
       if (!customerName.trim() || !customerPhone.trim()) {
         setError('يجب إدخال اسم العميل ورقم الهاتف في حالة البيع الآجل');
@@ -68,17 +59,14 @@ export function CheckoutModal({
       setError('في حالة الدفع النقدي يجب دفع المبلغ كاملاً');
       return;
     }
-
     let finalSource: PaymentSource | undefined = undefined;
     if (paid > 0) {
       const source = await promptPaymentSource();
       if (!source) return; // User closed the prompt
       finalSource = source;
     }
-
     onConfirm(customerName, customerPhone, isCredit ? paid : totalAmount, finalSource, saleType);
   };
-
   return (
     <>
       <PaymentSourcePromptModal />
@@ -90,18 +78,16 @@ export function CheckoutModal({
         zIndexClassName="z-[60]"
         headerClassName={isCredit ? 'bg-amber-50' : 'bg-emerald-50'}
       >
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="bg-[var(--color-page-bg)] p-4 rounded-xl flex items-center justify-between border border-[var(--color-border)]">
-            <span className="text-[var(--color-text-muted)] font-semibold">الإجمالي المطلوب:</span>
-            <span className="text-2xl font-bold text-[var(--color-text-main)]">{formatCurrency(totalAmount)}</span>
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
+          <div className="bg-[var(--color-page-bg)] p-3 sm:p-4 rounded-xl flex flex-wrap items-center justify-between gap-2 border border-[var(--color-border)]">
+            <span className="text-[var(--color-text-muted)] font-semibold text-sm sm:text-base">الإجمالي المطلوب:</span>
+            <span className="text-xl sm:text-2xl font-bold text-[var(--color-text-main)]">{formatCurrency(totalAmount)}</span>
           </div>
-
           {error && (
             <div className="p-3 bg-red-50 text-[var(--color-danger)] rounded-lg text-sm font-semibold text-center border border-red-100">
               {error}
             </div>
           )}
-
           <div>
             <label className="text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
@@ -117,7 +103,10 @@ export function CheckoutModal({
               <option value={SaleType.Wholesale}>جملة</option>
             </select>
           </div>
-          <div>`n            <label className="text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center justify-between">`n              <span className="flex items-center gap-1.5">`n                <Phone size={16} /> رقم الهاتف
+          <div>
+            <label className="text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Phone size={16} /> رقم الهاتف
               </span>
               {isCredit && <span className="text-[var(--color-danger)]">*</span>}
             </label>
@@ -131,7 +120,6 @@ export function CheckoutModal({
               dir="ltr"
             />
           </div>
-
           <div>
             <label className="text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
@@ -148,7 +136,6 @@ export function CheckoutModal({
               required={isCredit}
             />
           </div>
-
           {isCredit && (
             <div className="pt-2 border-t border-[var(--color-border)]">
               <label className="text-sm font-semibold text-[var(--color-text-main)] mb-2 flex items-center justify-between">
@@ -180,11 +167,10 @@ export function CheckoutModal({
               )}
             </div>
           )}
-
           <button
             type="submit"
             disabled={isSubmitting || isPoliciesLoading}
-            className={`w-full py-3.5 rounded-xl font-bold text-white text-lg disabled:opacity-70 ${
+            className={`w-full py-3 sm:py-3.5 rounded-xl font-bold text-white text-base sm:text-lg disabled:opacity-70 ${
               isCredit ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'
             }`}
           >
@@ -195,4 +181,3 @@ export function CheckoutModal({
     </>
   );
 }
-

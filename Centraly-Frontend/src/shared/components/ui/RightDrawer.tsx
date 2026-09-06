@@ -28,7 +28,7 @@ export function RightDrawer({ isOpen, onClose, title, children, footer, width = 
 
       <div
         ref={drawerRef}
-        className={cn("relative bg-[var(--color-surface)] h-full shadow-2xl flex flex-col", width)}
+        className={cn("relative bg-[var(--color-surface)] h-full shadow-2xl flex flex-col max-w-[100vw]", width)}
         role="dialog"
         aria-modal="true"
         aria-labelledby="drawer-title"

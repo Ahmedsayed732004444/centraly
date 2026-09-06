@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { 
   MonitorSmartphone, ShoppingCart, Wrench, Package, 
   Users, Wallet, Settings, LogOut, ShoppingBag,
-  ChevronDown, ChevronUp, Grip, Zap
+  ChevronDown, ChevronUp, Grip, Zap, X
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useSidebarStore } from "@/shared/hooks/useSidebarStore";
@@ -102,7 +102,7 @@ const menuGroups: MenuGroup[] = [
 export function Sidebar() {
   const location = useLocation();
   const { logout, hasAnyRole } = useAuth();
-  const { isOpen } = useSidebarStore();
+  const { isOpen, toggle } = useSidebarStore();
   
   const [collapsedGroups, setCollapsedGroups] = useState<Record<number, boolean>>({});
 
@@ -116,23 +116,52 @@ export function Sidebar() {
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
+  const closeOnMobile = () => {
+    if (window.innerWidth < 768 && isOpen) {
+      toggle();
+    }
+  };
+
   return (
-    <aside className={`${isOpen ? 'w-64' : 'w-20'} transition-all duration-300 bg-[#F1F5F9] text-slate-900 flex flex-col h-screen fixed right-0 top-0 border-l border-slate-200 flex-shrink-0 z-20 shadow-[rgba(0,0,0,0.04)_inset_0px_0px_0px,rgba(0,0,0,0.05)_-4px_0px_10px]`}>
+    <aside className={`${isOpen ? 'translate-x-0 w-64' : 'translate-x-full md:translate-x-0 md:w-20'} transition-all duration-300 bg-[#F1F5F9] text-slate-900 flex flex-col h-screen fixed right-0 top-0 border-l border-slate-200 flex-shrink-0 z-50 shadow-[rgba(0,0,0,0.04)_inset_0px_0px_0px,rgba(0,0,0,0.05)_-4px_0px_10px]`}>
 
       {/* Logo Area */}
-      <div className="h-20 flex items-center justify-center border-b border-slate-200 bg-[#F1F5F9] shrink-0 relative overflow-hidden">
-        <div className={`${isOpen ? 'opacity-100 flex items-center gap-3' : 'opacity-0 hidden'} transition-all duration-300 relative z-10 w-full px-6`}>
-          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-600/20">
-            <Grip className="w-6 h-6 text-white" />
+      <div className="h-20 flex items-center justify-between border-b border-slate-200 bg-[#F1F5F9] shrink-0 relative overflow-hidden px-4">
+        {isOpen ? (
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={toggle}
+                className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center justify-center shadow-md shadow-blue-600/20 text-white transition-all cursor-pointer focus:outline-none"
+                title="طي / فتح القائمة"
+              >
+                <Grip className="w-6 h-6 text-white" />
+              </button>
+              <h1 className="text-2xl font-extrabold text-slate-800 tracking-wide select-none">
+                سنترالي
+              </h1>
+            </div>
+            {/* Close button for mobile */}
+            <button
+              type="button"
+              onClick={toggle}
+              className="md:hidden p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors cursor-pointer"
+              title="إغلاق القائمة"
+              aria-label="إغلاق القائمة"
+            >
+              <X size={20} />
+            </button>
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-800 tracking-wide">
-            سنترالي
-          </h1>
-        </div>
-        {!isOpen && (
-          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-600/20 relative z-10">
+        ) : (
+          <button
+            type="button"
+            onClick={toggle}
+            className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center justify-center shadow-md shadow-blue-600/20 text-white transition-all cursor-pointer mx-auto focus:outline-none"
+            title="توسيع القائمة"
+          >
             <Grip className="w-6 h-6 text-white" />
-          </div>
+          </button>
         )}
       </div>
 
@@ -170,6 +199,7 @@ export function Sidebar() {
                   <li key={item.path}>
                     <Link
                       to={item.path}
+                      onClick={closeOnMobile}
                       title={!isOpen ? item.name : undefined}
                       className={`${isOpen ? 'gap-3 px-3.5' : 'justify-center px-0'} flex items-center py-3 rounded-xl transition-all duration-200 text-[15px] font-semibold relative ${active ? "bg-white text-blue-700 shadow-sm border border-slate-200/60" : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900 border border-transparent"}`}
                     >
@@ -190,6 +220,7 @@ export function Sidebar() {
           <div className="border-t border-slate-200 pt-6 mt-3 mb-3 space-y-1.5">
             <Link
               to="/settings/finance-policies"
+              onClick={closeOnMobile}
               title={!isOpen ? "سياسات النظام" : undefined}
               className={`${isOpen ? 'gap-3 px-3.5' : 'justify-center px-0'} flex items-center py-3 rounded-xl transition-all duration-200 text-[15px] font-semibold relative ${location.pathname === "/settings/finance-policies" ? "bg-white text-blue-700 shadow-sm border border-slate-200/60" : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900 border border-transparent"}`}
             >
@@ -201,6 +232,7 @@ export function Sidebar() {
             
             <Link
               to="/settings/wallets"
+              onClick={closeOnMobile}
               title={!isOpen ? "إدارة المحافظ" : undefined}
               className={`${isOpen ? 'gap-3 px-3.5' : 'justify-center px-0'} flex items-center py-3 rounded-xl transition-all duration-200 text-[15px] font-semibold relative ${location.pathname === "/settings/wallets" ? "bg-white text-blue-700 shadow-sm border border-slate-200/60" : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900 border border-transparent"}`}
             >

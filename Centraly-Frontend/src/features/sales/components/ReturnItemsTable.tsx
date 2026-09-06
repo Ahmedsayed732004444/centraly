@@ -1,18 +1,16 @@
 import { formatCurrency } from '@/shared/utils/currency';
 import { SalesInvoiceResponse } from '../schemas/salesSchemas';
-
 interface ReturnItemsTableProps {
   invoice: SalesInvoiceResponse;
   returnItems: { id: string; returnQty: number }[];
   onReturnQtyChange: (itemId: string, maxQty: number, qty: number) => void;
 }
-
 export function ReturnItemsTable({ invoice, returnItems, onReturnQtyChange }: ReturnItemsTableProps) {
   return (
     <div>
       <h3 className="text-lg font-semibold mb-4">المنتجات</h3>
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
-        <table className="w-full text-sm text-right">
+      <div className="border border-gray-200 rounded-lg overflow-x-auto">
+        <table className="w-full min-w-[560px] text-sm text-right">
           <thead className="bg-gray-50 text-gray-700">
             <tr>
               <th className="px-4 py-3">المنتج</th>
@@ -25,7 +23,6 @@ export function ReturnItemsTable({ invoice, returnItems, onReturnQtyChange }: Re
             {invoice.items.map(item => {
               const currentQty = returnItems.find(i => i.id === item.id)?.returnQty || 0;
               const maxAllowed = item.quantity - (item.returnedQuantity || 0);
-
               return (
                 <tr key={item.id}>
                   <td className="px-4 py-3 font-medium">{item.productName || item.productId}</td>
@@ -37,7 +34,7 @@ export function ReturnItemsTable({ invoice, returnItems, onReturnQtyChange }: Re
                     )}
                   </td>
                   <td className="px-4 py-3 w-48">
-                    <input 
+                    <input
                       type="number"
                       min="0"
                       max={maxAllowed}
