@@ -1,9 +1,12 @@
 import { formatCurrency } from '@/shared/utils/currency';
 import { formatDate } from '@/shared/utils/date';
-import { CornerUpLeft } from 'lucide-react';
+import { CornerUpLeft, Printer } from 'lucide-react';
 import { SaleType, PaymentMethod, SalesInvoiceResponse } from '../schemas/salesSchemas';
 
-export const getSalesHistoryColumns = (onReturnClick: (invoiceNumber: string) => void) => [
+export const getSalesHistoryColumns = (
+  onReturnClick: (invoiceNumber: string) => void,
+  onPrintClick?: (invoice: SalesInvoiceResponse) => void
+) => [
   {
     header: 'رقم الفاتورة',
     cell: (row: SalesInvoiceResponse) => (
@@ -63,17 +66,26 @@ export const getSalesHistoryColumns = (onReturnClick: (invoiceNumber: string) =>
   {
     header: 'الإجراءات',
     cell: (row: SalesInvoiceResponse) => (
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onReturnClick(row.invoiceNumber);
-        }}
-        className="flex items-center gap-1 px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition-colors font-medium text-sm border border-red-200"
-        title="إرجاع الفاتورة"
-      >
-        <CornerUpLeft size={16} />
-        <span>إرجاع</span>
-      </button>
+      <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+        {onPrintClick && (
+          <button
+            onClick={() => onPrintClick(row)}
+            className="flex items-center gap-1 px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition-colors font-medium text-xs border border-gray-300 shadow-2xs"
+            title="طباعة الفاتورة الحرارية (80mm)"
+          >
+            <Printer size={15} />
+            <span>طباعة</span>
+          </button>
+        )}
+        <button
+          onClick={() => onReturnClick(row.invoiceNumber)}
+          className="flex items-center gap-1 px-2.5 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-md transition-colors font-medium text-xs border border-red-200 shadow-2xs"
+          title="إرجاع الفاتورة"
+        >
+          <CornerUpLeft size={15} />
+          <span>إرجاع</span>
+        </button>
+      </div>
     ),
   },
 ];

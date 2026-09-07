@@ -7,16 +7,19 @@ import { useProducts } from '@/features/inventory/hooks/useInventory';
 import { RightDrawer as Drawer } from '@/shared/components/ui/RightDrawer';
 import { Input } from '@/shared/components/ui/Input';
 import { tokens } from '@/shared/styles/tokens';
-import { Save, CheckCircle, RotateCcw, Plus, Minus } from 'lucide-react';
+import { Save, CheckCircle, RotateCcw, Plus, Minus, Printer } from 'lucide-react';
 import { PageLoader } from '@/shared/components/ui/PageLoader';
 import { isMaintenanceProduct } from '@/features/inventory/schemas/inventorySchemas';
 import { toast } from 'sonner';
 import { MaintenanceProductPicker } from './MaintenanceProductPicker';
+import { MaintenanceResponse } from '../schemas/maintenanceSchemas';
+import { printMaintenanceIntakeReceipt, printMaintenanceDeliveryReceipt } from '../utils/maintenanceReceiptPrint';
 interface Props {
   id: string | null;
   onClose: () => void;
+  onDelivered?: (ticket: MaintenanceResponse) => void;
 }
-export function MaintenanceDetailDrawer({ id, onClose }: Props) {
+export function MaintenanceDetailDrawer({ id, onClose, onDelivered }: Props) {
   const { data: ticket, isLoading } = useMaintenanceDetail(id);
   const { mutate: updateTicket, isPending: isUpdating } = useUpdateMaintenance();
   const { mutate: deliverTicket, isPending: isDelivering } = useDeliverMaintenance();
@@ -67,9 +70,16 @@ const [isPickerOpen, setIsPickerOpen] = useState(false);
     });
   };
   const handleDeliver = () => {
-    if (!id) return;
+    if (!id || !ticket) return;
     if (window.confirm(`هل أنت متأكد من تسليم الجهاز؟\nسيتم سحب قطع الغيار من المخزن، وإضافة المتبقي (${remaining} ج.م) للدرج.`)) {
-      deliverTicket(id, { onSuccess: onClose });
+      deliverTicket(id, {
+        onSuccess: (delivered) => {
+          onClose();
+          if (onDelivered) {
+            onDelivered(delivered || ticket);
+          }
+        },
+      });
     }
   };
   const handleReturn = () => {
@@ -94,16 +104,41 @@ if (!id) return null;
         <form onSubmit={handleSubmit(onSubmit as any)} className="h-full flex flex-col">
           <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6">
             {}
-            <div className={`p-4 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 ${
+            <div className={`p-4 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 ${
               ticket.status === 'Pending' ? 'bg-yellow-50 text-yellow-800 border border-yellow-200' :
               ticket.status === 'Delivered' ? 'bg-green-50 text-green-800 border border-green-200' :
               'bg-red-50 text-red-800 border border-red-200'
             }`}>
-              <div className="font-bold text-lg">
-                الحالة: {ticket.status === 'Pending' ? 'قيد الانتظار' : ticket.status === 'Delivered' ? 'تم التسليم' : 'مرتجع'}
+              <div>
+                <div className="font-bold text-lg">
+                  الحالة: {ticket.status === 'Pending' ? 'قيد الانتظار' : ticket.status === 'Delivered' ? 'تم التسليم' : 'مرتجع'}
+                </div>
+                <div className="text-sm opacity-80 mt-0.5">
+                  تاريخ الإنشاء: {new Date(ticket.createdAt).toLocaleDateString('ar-EG')}
+                </div>
               </div>
-              <div className="text-sm opacity-80">
-                تاريخ الإنشاء: {new Date(ticket.createdAt).toLocaleDateString('ar-EG')}
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => printMaintenanceIntakeReceipt(ticket)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 rounded-lg text-xs font-bold transition-all shadow-2xs"
+                  title="طباعة إيصال استلام الجهاز للعميل (Xprinter 80mm)"
+                >
+                  <Printer className="w-3.5 h-3.5 text-blue-600" />
+                  <span>طباعة إيصال الاستلام</span>
+                </button>
+                {ticket.status === 'Delivered' && (
+                  <button
+                    type="button"
+                    onClick={() => printMaintenanceDeliveryReceipt(ticket)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-2xs"
+                    title="طباعة فاتورة تسليم الصيانة (بدون قطع الغيار)"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>طباعة فاتورة التسليم</span>
+                  </button>
+                )}
               </div>
             </div>
             {}
@@ -277,9 +312,21 @@ if (!id) return null;
                 </>
               )}
               {ticket.status !== 'Pending' && (
-                <button type="button" onClick={onClose} className={tokens.btn.primary + " w-full sm:w-auto"}>
-                  إغلاق
-                </button>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  {ticket.status === 'Delivered' && (
+                    <button
+                      type="button"
+                      onClick={() => printMaintenanceDeliveryReceipt(ticket)}
+                      className="flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-sm shadow-sm transition-colors w-full sm:w-auto"
+                    >
+                      <Printer className="w-4 h-4" />
+                      <span>طباعة فاتورة التسليم (80mm)</span>
+                    </button>
+                  )}
+                  <button type="button" onClick={onClose} className={tokens.btn.primary + " w-full sm:w-auto"}>
+                    إغلاق
+                  </button>
+                </div>
               )}
             </div>
           </div>

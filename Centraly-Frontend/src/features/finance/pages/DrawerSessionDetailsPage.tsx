@@ -6,7 +6,8 @@ import { formatCurrency } from '@/shared/utils/currency';
 import { formatDate } from '@/shared/utils/date';
 import { DrawerTransactionsTable } from '../components/DrawerTransactionsTable';
 import { CloseDrawerModal } from '../components/CloseDrawerModal';
-import { CheckCircle, Clock, ChevronRight, Wallet } from 'lucide-react';
+import { CheckCircle, Clock, ChevronRight, Wallet, Download } from 'lucide-react';
+import { exportDrawerSessionToExcel } from '../utils/exportDrawerSessionExcel';
 import { tokens } from '@/shared/styles/tokens';
 export function DrawerSessionDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -46,14 +47,30 @@ export function DrawerSessionDetailsPage() {
           </div>
         </div>
         {session.isClosed ? (
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 border border-gray-200 self-start sm:self-auto">
-            <CheckCircle className="w-4 h-4" /> وردية مغلقة
-          </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 border border-gray-200">
+              <CheckCircle className="w-4 h-4" /> وردية مغلقة
+            </span>
+            <button
+              onClick={() => exportDrawerSessionToExcel(session)}
+              className={tokens.btn.secondary + " flex items-center gap-2 py-1.5 px-4 text-sm"}
+            >
+              <Download className="w-4 h-4" />
+              تصدير Excel
+            </button>
+          </div>
         ) : (
           <div className="flex flex-wrap items-center gap-3">
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-green-50 text-green-700 border border-green-200">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> وردية جارية الآن
             </span>
+            <button
+              onClick={() => exportDrawerSessionToExcel(session)}
+              className={tokens.btn.secondary + " flex items-center gap-2 py-1.5 px-4 text-sm"}
+            >
+              <Download className="w-4 h-4" />
+              تصدير Excel
+            </button>
             <button
               onClick={() => setIsCloseModalOpen(true)}
               className={tokens.btn.primary + " bg-red-600 hover:bg-red-700 ring-red-500 py-1.5 px-4 text-sm"}

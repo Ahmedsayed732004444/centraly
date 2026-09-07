@@ -6,6 +6,7 @@ import { InvoiceDetailsModal } from '../components/InvoiceDetailsModal';
 import { getSalesHistoryColumns } from '../components/SalesHistoryColumns';
 import { SalesHistorySearchBar } from '../components/SalesHistorySearchBar';
 import { useNavigate } from 'react-router-dom';
+import { printThermalReceipt } from '../utils/thermalReceiptPrint';
 export function SalesHistoryPage() {
   const [pageIndex, setPageIndex] = useState(1);
   const pageSize = 10;
@@ -21,9 +22,14 @@ export function SalesHistoryPage() {
     pageSize,
     searchValue: debouncedSearch,
   });
-  const columns = getSalesHistoryColumns((invoiceNumber) => {
-    navigate(`/sales/returns/new?invoiceId=${invoiceNumber}`);
-  });
+  const columns = getSalesHistoryColumns(
+    (invoiceNumber) => {
+      navigate(`/sales/returns/new?invoiceId=${invoiceNumber}`);
+    },
+    (invoice) => {
+      printThermalReceipt(invoice);
+    }
+  );
   return (
     <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-500">
       {}

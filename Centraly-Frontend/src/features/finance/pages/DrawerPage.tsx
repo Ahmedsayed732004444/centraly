@@ -8,7 +8,8 @@ import { PageLoader } from '@/shared/components/ui/PageLoader';
 import { tokens } from '@/shared/styles/tokens';
 import { formatCurrency } from '@/shared/utils/currency';
 import { formatDate } from '@/shared/utils/date';
-import { PlusCircle, Wallet, ArrowUpRight, ArrowDownRight, Clock, History } from 'lucide-react';
+import { PlusCircle, Wallet, ArrowUpRight, ArrowDownRight, Clock, History, Download } from 'lucide-react';
+import { exportDrawerSessionToExcel } from '../utils/exportDrawerSessionExcel';
 import { DrawerTransactionResponse } from '../schemas/financeSchemas';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -52,6 +53,7 @@ function DrawerContent({ type }: { type: number }) {
   if (!session) {
     return <OpenDrawerForm type={type} />;
   }
+  const handleExport = () => exportDrawerSessionToExcel(session);
   const runningIncome = (session.transactions || []).filter((t: DrawerTransactionResponse) => t.type === 1).reduce((acc: number, t: DrawerTransactionResponse) => acc + t.amount, 0);
   const runningExpense = (session.transactions || []).filter((t: DrawerTransactionResponse) => t.type === 2).reduce((acc: number, t: DrawerTransactionResponse) => acc + t.amount, 0);
   const currentBalance = session.openingBalance + runningIncome - runningExpense;
@@ -76,6 +78,13 @@ function DrawerContent({ type }: { type: number }) {
             <History className="w-5 h-5 shrink-0" />
             <span>تصفح السجل</span>
           </Link>
+          <button
+            onClick={handleExport}
+            className={tokens.btn.secondary + " flex items-center justify-center gap-2 flex-1 sm:flex-none"}
+          >
+            <Download className="w-5 h-5 shrink-0" />
+            <span>تصدير Excel</span>
+          </button>
           <button
             onClick={() => setIsCloseModalOpen(true)}
             className={tokens.btn.primary + " bg-red-600 hover:bg-red-700 ring-red-500 flex-1 sm:flex-none"}

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateMaintenanceRequest, createMaintenanceSchema } from '../schemas/maintenanceSchemas';
@@ -16,9 +16,11 @@ import {
   Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { MaintenanceResponse } from '../schemas/maintenanceSchemas';
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  onCreated?: (ticket: MaintenanceResponse) => void;
 }
 const TIME_PRESETS = [
   { label: '30 دقيقة', minutes: 30 },
@@ -50,7 +52,7 @@ function formatArabicDelivery(isoString?: string) {
   if (isTomorrow) return `غداً، ${timePart}`;
   return date.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', hour12: true });
 }
-export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
+export function MaintenanceQuickCreateDrawer({ isOpen, onClose, onCreated }: Props) {
   const { mutate: createMaintenance, isPending } = useCreateMaintenance();
   const [activeTimePreset, setActiveTimePreset] = useState<number | 'custom' | null>(null);
   const [customerSearch, setCustomerSearch] = useState('');
@@ -98,7 +100,14 @@ export function MaintenanceQuickCreateDrawer({ isOpen, onClose }: Props) {
   const onSubmit = (data: CreateMaintenanceRequest) => {
     const payload = { ...data };
     if (!payload.deliveryDate) delete payload.deliveryDate;
-    createMaintenance(payload, { onSuccess: () => onClose() });
+    createMaintenance(payload, {
+      onSuccess: (created) => {
+        onClose();
+        if (onCreated && created) {
+          onCreated(created);
+        }
+      },
+    });
   };
   return (
     <Drawer isOpen={isOpen} onClose={onClose} title="إضافة تذكرة صيانة" width="w-[500px] max-w-full">

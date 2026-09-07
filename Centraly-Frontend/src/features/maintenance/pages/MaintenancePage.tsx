@@ -3,6 +3,8 @@ import { useMaintenanceList } from '../api/queries';
 import { MaintenanceQuickCreateDrawer } from '../components/MaintenanceQuickCreateDrawer';
 import { MaintenanceDetailDrawer } from '../components/MaintenanceDetailDrawer';
 import { MaintenanceListTable } from '../components/MaintenanceListTable';
+import { MaintenanceSuccessModal } from '../components/MaintenanceSuccessModal';
+import { MaintenanceResponse } from '../schemas/maintenanceSchemas';
 import { Wrench, Plus } from 'lucide-react';
 export function MaintenancePage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -10,6 +12,10 @@ export function MaintenancePage() {
   const [pageIndex, setPageIndex] = useState(1);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [successModalState, setSuccessModalState] = useState<{
+    ticket: MaintenanceResponse;
+    mode: 'intake' | 'delivery';
+  } | null>(null);
   const { data, isLoading } = useMaintenanceList({
     pageNumber: pageIndex,
     pageSize: 10,
@@ -82,11 +88,20 @@ export function MaintenancePage() {
       <MaintenanceQuickCreateDrawer
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
+        onCreated={(ticket) => setSuccessModalState({ ticket, mode: 'intake' })}
       />
       {}
       <MaintenanceDetailDrawer
         id={selectedId}
         onClose={() => setSelectedId(null)}
+        onDelivered={(ticket) => setSuccessModalState({ ticket, mode: 'delivery' })}
+      />
+      {}
+      <MaintenanceSuccessModal
+        isOpen={!!successModalState}
+        onClose={() => setSuccessModalState(null)}
+        ticket={successModalState?.ticket || null}
+        mode={successModalState?.mode || 'intake'}
       />
     </div>
   );

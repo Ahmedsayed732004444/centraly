@@ -1,8 +1,9 @@
-import { Receipt } from 'lucide-react';
+import { Receipt, Printer } from 'lucide-react';
 import { useSalesInvoiceDetails } from '@/features/sales/hooks/useSales';
 import { formatCurrency } from '@/shared/utils/currency';
 import { BaseModal } from '@/shared/components/ui/BaseModal';
 import { Spinner } from '@/shared/components/ui/Spinner';
+import { printThermalReceipt } from '../utils/thermalReceiptPrint';
 interface InvoiceDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -25,6 +26,21 @@ export function InvoiceDetailsModal({ isOpen, onClose, invoiceId }: InvoiceDetai
           </div>
         ) : invoice ? (
           <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)]">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-[var(--color-text-muted)] font-medium">رقم الفاتورة:</span>
+                <span className="text-sm sm:text-base font-black font-mono bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-1 rounded-lg">
+                  #{invoice.invoiceNumber}
+                </span>
+              </div>
+              <button
+                onClick={() => printThermalReceipt(invoice)}
+                className="flex items-center gap-2 px-3.5 py-2 bg-gray-900 hover:bg-black text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm transition-all active:scale-[0.98]"
+              >
+                <Printer size={16} />
+                <span>طباعة حرارية (Xprinter 80mm)</span>
+              </button>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               <div className="bg-[var(--color-page-bg)] rounded-xl p-3 sm:p-4 border border-[var(--color-border)]">
                 <span className="text-sm text-[var(--color-text-muted)] block mb-1">الإجمالي</span>

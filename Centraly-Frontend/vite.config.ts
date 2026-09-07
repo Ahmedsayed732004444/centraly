@@ -14,6 +14,9 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, './src'),
     },
   },
+  define: {
+    global: 'globalThis',
+  },
   test: {
     globals: true,
     environment: 'jsdom',

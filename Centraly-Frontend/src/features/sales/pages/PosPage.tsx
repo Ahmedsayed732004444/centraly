@@ -9,7 +9,10 @@ import { BatchSelectionModal } from '../components/BatchSelectionModal';
 import { CheckoutModal } from '../components/CheckoutModal';
 import { useCreateSalesInvoice } from '../hooks/useSales';
 import { usePosCart } from '../hooks/usePosCart';
-import { SaleType, PaymentMethod } from '../schemas/salesSchemas';
+import { SaleType, PaymentMethod, SalesInvoiceResponse } from '../schemas/salesSchemas';
+import { SaleSuccessModal } from '../components/SaleSuccessModal';
+import { printThermalReceipt } from '../utils/thermalReceiptPrint';
+import { getReceiptSettings } from '../utils/receiptSettings';
 export function PosPage() {
   const { setTitle, setBackButton } = useHeaderStore();
   const cart = usePosCart();
@@ -21,6 +24,7 @@ export function PosPage() {
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
   const [checkoutMethod, setCheckoutMethod] = useState<PaymentMethod | null>(null);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const [completedInvoice, setCompletedInvoice] = useState<SalesInvoiceResponse | null>(null);
   const { data: productsData, isLoading: isLoadingProducts } = useProducts({
     pageNumber: pageNumber,
     pageSize: 8,
@@ -78,10 +82,14 @@ export function PosPage() {
         sellingPrice: item.price,
       })),
     }, {
-      onSuccess: () => {
+      onSuccess: (invoice) => {
         cart.clear();
         setIsCheckoutModalOpen(false);
         setCheckoutMethod(null);
+        setCompletedInvoice(invoice);
+        if (getReceiptSettings().autoPrint) {
+          printThermalReceipt(invoice);
+        }
       },
     });
   };
@@ -138,6 +146,12 @@ export function PosPage() {
         paymentMethod={checkoutMethod}
         onConfirm={handleConfirmCheckout}
         isSubmitting={createInvoiceMutation.isPending}
+      />
+      <SaleSuccessModal
+        isOpen={!!completedInvoice}
+        onClose={() => setCompletedInvoice(null)}
+        invoice={completedInvoice}
+        onNewSale={() => setCompletedInvoice(null)}
       />
     </div>
   );
