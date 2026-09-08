@@ -34,7 +34,7 @@ export function SupplierReturnsTable(props: SupplierReturnsTableProps) {
     },
     {
       header: 'عدد الأصناف',
-      cell: (row: SupplierReturnResponse) => row.items?.length || 0,
+      cell: (row: SupplierReturnResponse) => (row as any).itemsCount ?? row.items?.length ?? 0,
     },
     {
       header: 'إجمالي المرتجع',

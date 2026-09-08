@@ -4,6 +4,29 @@ import { SafeTransactionResponse } from '../schemas/financeSchemas';
 interface SafeTransactionsTableProps {
   transactions: SafeTransactionResponse[] | any;
 }
+const TYPE_TRANSLATIONS: Record<string, string> = {
+  'Income': 'إيداع',
+  'Withdrawal': 'سحب',
+  'Expense': 'مصروفات',
+  'Purchases': 'مشتريات',
+  'Sales': 'مبيعات',
+};
+
+const CATEGORY_TRANSLATIONS: Record<string, string> = {
+  'ManualDeposit': 'إيداع يدوي',
+  'ManualWithdrawal': 'سحب يدوي',
+  'Purchases': 'مشتريات',
+  'Sales': 'مبيعات',
+  'Expenses': 'مصروفات',
+  'DrawerDeposit': 'استلام من الدرج',
+  'DrawerWithdrawal': 'تحويل للدرج',
+  'OwnerDeposit': 'إيداع المالك',
+  'OwnerWithdrawal': 'مسحوبات المالك',
+  'SupplierReturn': 'مرتجع مورد',
+  'SalesReturn': 'مرتجع مبيعات',
+  'Maintenance': 'صيانة',
+};
+
 export function SafeTransactionsTable({ transactions }: SafeTransactionsTableProps) {
   const txList = Array.isArray(transactions) ? transactions : (transactions?.items || []);
   if (!txList || txList.length === 0) {
@@ -36,11 +59,11 @@ export function SafeTransactionsTable({ transactions }: SafeTransactionsTablePro
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${isIncome ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                    {tx.transactionType === 'Income' ? 'إيداع' : (tx.transactionType === 'Withdrawal' ? 'سحب' : tx.transactionType)}
+                    {TYPE_TRANSLATIONS[tx.transactionType] || tx.transactionType}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
-                  {tx.category || '-'}
+                  {tx.category ? (CATEGORY_TRANSLATIONS[tx.category] || tx.category) : '-'}
                 </td>
                 <td className="px-4 py-3 font-semibold text-gray-800 whitespace-nowrap" dir="ltr">
                   <span className={isIncome ? 'text-green-600' : 'text-red-600'}>

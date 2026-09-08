@@ -58,7 +58,7 @@ const [isPickerOpen, setIsPickerOpen] = useState(false);
   }, [ticket, reset]);
   const watchProductsUsed = watch('productsUsed') || [];
   const watchServicePrice = watch('servicePrice') || 0;
-  const totalParts = watchProductsUsed.reduce((acc, curr) => acc + (Number(curr.maintenancePrice || 0) * Number(curr.quantity || 0)), 0);
+  const totalParts = watchProductsUsed.reduce((acc, curr) => acc + ((curr.maintenancePrice || 0) * (curr.quantity || 0)), 0);
   const currentTotal = Number(watchServicePrice) + totalParts;
   const currentPaid = watch('paidAmount') || 0;
   const remaining = currentTotal - currentPaid;
@@ -208,21 +208,17 @@ if (!id) return null;
                             onFocus={(e) => e.target.select()}
                           />
                         </div>
-                        <div className="w-24 sm:w-32">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">سعر الصيانة</label>
-                          <Input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            {...register(`productsUsed.${index}.maintenancePrice`)}
-                            disabled={ticket.status !== 'Pending'}
-                            onFocus={(e) => e.target.select()}
-                          />
+                        <div className="w-24 sm:w-32 bg-gray-50/50 border border-gray-100 rounded-lg p-2 text-center">
+                          <label className="block text-xs font-medium text-gray-500 mb-0.5">سعر الصيانة</label>
+                          <div className="font-bold text-emerald-600 text-sm">
+                            {watchProductsUsed[index]?.maintenancePrice?.toLocaleString('ar-EG')} ج.م
+                          </div>
+                          <input type="hidden" {...register(`productsUsed.${index}.maintenancePrice`)} />
                         </div>
                         <div className="w-24 sm:w-32 bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
                           <label className="block text-xs font-medium text-gray-500 mb-0.5">الإجمالي</label>
                           <div className="font-bold text-gray-800 text-sm">
-                            {(Number(watchProductsUsed[index]?.quantity || 0) * Number(watchProductsUsed[index]?.maintenancePrice || 0)).toLocaleString('ar-EG')}
+                            {((watchProductsUsed[index]?.quantity || 0) * (watchProductsUsed[index]?.maintenancePrice || 0)).toLocaleString('ar-EG')}
                           </div>
                         </div>
                         {ticket.status === 'Pending' && (
