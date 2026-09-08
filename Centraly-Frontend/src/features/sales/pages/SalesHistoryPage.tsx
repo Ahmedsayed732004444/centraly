@@ -7,6 +7,9 @@ import { getSalesHistoryColumns } from '../components/SalesHistoryColumns';
 import { SalesHistorySearchBar } from '../components/SalesHistorySearchBar';
 import { useNavigate } from 'react-router-dom';
 import { printThermalReceipt } from '../utils/thermalReceiptPrint';
+import { salesRepository } from '../api/salesApi';
+import { toast } from 'sonner';
+
 export function SalesHistoryPage() {
   const [pageIndex, setPageIndex] = useState(1);
   const pageSize = 10;
@@ -26,8 +29,16 @@ export function SalesHistoryPage() {
     (invoiceNumber) => {
       navigate(`/sales/returns/new?invoiceId=${invoiceNumber}`);
     },
-    (invoice) => {
-      printThermalReceipt(invoice);
+    async (invoice) => {
+      try {
+        const toastId = toast.loading('جاري تحضير الفاتورة للطباعة...');
+        const fullInvoice = await salesRepository.getInvoice(invoice.id);
+        toast.dismiss(toastId);
+        printThermalReceipt(fullInvoice);
+      } catch (error) {
+        toast.dismiss();
+        toast.error('حدث خطأ أثناء جلب تفاصيل الفاتورة');
+      }
     }
   );
   return (
