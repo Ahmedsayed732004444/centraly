@@ -1,4 +1,4 @@
-import { SalesInvoiceResponse, PaymentMethod } from '../schemas/salesSchemas';
+import { SalesInvoiceResponse, SaleType, PaymentMethod } from '../schemas/salesSchemas';
 import { getReceiptSettings, ReceiptSettings } from './receiptSettings';
 import { generateCode128Svg } from './barcode128';
 import { formatDate } from '@/shared/utils/date';
@@ -15,6 +15,7 @@ export function buildThermalReceiptHtml(invoice: SalesInvoiceResponse, customSet
     includeText: true,
   });
 
+  const saleTypeLabel = invoice.saleType === SaleType.Wholesale ? 'جملة' : 'قطاعي (تجزئة)';
   const paymentMethodLabel = invoice.paymentMethod === PaymentMethod.Cash ? 'نقدي (كاش)' : 'آجل (ذمة)';
   const formattedDate = formatDate(invoice.createdAt);
   const totalQty = invoice.items.reduce((sum, item) => sum + item.quantity, 0);
@@ -262,6 +263,10 @@ export function buildThermalReceiptHtml(invoice: SalesInvoiceResponse, customSet
     <tr>
       <td class="meta-label">التاريخ والوقت:</td>
       <td class="meta-val">${formattedDate}</td>
+    </tr>
+    <tr>
+      <td class="meta-label">نوع الفاتورة:</td>
+      <td class="meta-val">${saleTypeLabel}</td>
     </tr>
     <tr>
       <td class="meta-label">طريقة الدفع:</td>

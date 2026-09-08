@@ -1,4 +1,5 @@
-import { Receipt, Printer } from 'lucide-react';
+import { Receipt, Printer, Copy } from 'lucide-react';
+import { toast } from 'sonner';
 import { useSalesInvoiceDetails } from '@/features/sales/hooks/useSales';
 import { formatCurrency } from '@/shared/utils/currency';
 import { BaseModal } from '@/shared/components/ui/BaseModal';
@@ -29,9 +30,21 @@ export function InvoiceDetailsModal({ isOpen, onClose, invoiceId }: InvoiceDetai
             <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[var(--color-border)]">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-[var(--color-text-muted)] font-medium">رقم الفاتورة:</span>
-                <span className="text-sm sm:text-base font-black font-mono bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-1 rounded-lg">
-                  #{invoice.invoiceNumber}
-                </span>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm sm:text-base font-black font-mono bg-blue-50 text-blue-800 border border-blue-200 px-2.5 py-1 rounded-lg">
+                    #{invoice.invoiceNumber}
+                  </span>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(invoice.invoiceNumber);
+                      toast.success('تم نسخ رقم الفاتورة بنجاح');
+                    }}
+                    className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors border border-transparent hover:border-blue-200 flex items-center justify-center"
+                    title="نسخ رقم الفاتورة"
+                  >
+                    <Copy size={18} />
+                  </button>
+                </div>
               </div>
               <button
                 onClick={() => printThermalReceipt(invoice)}
