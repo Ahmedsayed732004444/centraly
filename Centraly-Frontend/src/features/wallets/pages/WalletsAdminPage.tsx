@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useWallets } from '../hooks/useWallets';
 import { tokens } from '@/shared/styles/tokens';
 import { Wallet, Plus, Edit2, Info } from 'lucide-react';
@@ -9,17 +9,21 @@ import { z } from 'zod';
 import { formatDate } from '@/shared/utils/date';
 import { useHeaderStore } from '@/shared/hooks/useHeaderStore';
 import { useNavigate } from 'react-router-dom';
-import { WalletResponse } from '../schemas/walletSchemas';
+import { WalletResponse, WalletOperationType } from '../schemas/walletSchemas';
 import { GlobalWalletOperationsTable } from '../components/GlobalWalletOperationsTable';
+
 const walletFormSchema = z.object({
   name: z.string().min(1, 'اسم المحفظة مطلوب'),
   phoneNumber: z.string().min(1, 'رقم التليفون مطلوب'),
   ownerName: z.string().optional(),
   initialBalance: z.coerce.number().min(0, 'يجب أن يكون الرصيد 0 أو أكثر').optional(),
   isActive: z.boolean(),
+  allowedOperations: z.array(z.nativeEnum(WalletOperationType)).min(1, 'يرجى اختيار عملية واحدة على الأقل'),
   image: z.any().optional()
 });
+
 type WalletFormValues = z.infer<typeof walletFormSchema>;
+
 export function WalletsAdminPage() {
   const { setTitle } = useHeaderStore();
   const navigate = useNavigate();
@@ -27,18 +31,48 @@ export function WalletsAdminPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingWallet, setEditingWallet] = useState<WalletResponse | null>(null);
   const [activeTab, setActiveTab] = useState<'list' | 'history'>('list');
+
   useEffect(() => {
     setTitle('إدارة المحافظ');
   }, [setTitle]);
+
   const form = useForm<WalletFormValues>({
     resolver: zodResolver(walletFormSchema) as any,
-    defaultValues: { name: '', phoneNumber: '', ownerName: '', initialBalance: 0, isActive: true }
+    defaultValues: { 
+      name: '', 
+      phoneNumber: '', 
+      ownerName: '', 
+      initialBalance: 0, 
+      isActive: true,
+      allowedOperations: [WalletOperationType.CashIn, WalletOperationType.CashOut]
+    }
   });
+
+  const selectedOps = form.watch('allowedOperations') || [];
+
+  const toggleOperation = (type: WalletOperationType) => {
+    const current = form.getValues('allowedOperations') || [];
+    if (current.includes(type)) {
+      if (current.length === 1) return; // Must have at least one
+      form.setValue('allowedOperations', current.filter(t => t !== type), { shouldValidate: true });
+    } else {
+      form.setValue('allowedOperations', [...current, type], { shouldValidate: true });
+    }
+  };
+
   const openCreateDrawer = () => {
     setEditingWallet(null);
-    form.reset({ name: '', phoneNumber: '', ownerName: '', initialBalance: 0, isActive: true });
+    form.reset({ 
+      name: '', 
+      phoneNumber: '', 
+      ownerName: '', 
+      initialBalance: 0, 
+      isActive: true,
+      allowedOperations: [WalletOperationType.CashIn, WalletOperationType.CashOut]
+    });
     setIsDrawerOpen(true);
   };
+
   const openEditDrawer = (wallet: WalletResponse, e: React.MouseEvent) => {
     e.stopPropagation();
     setEditingWallet(wallet);
@@ -48,9 +82,13 @@ export function WalletsAdminPage() {
       ownerName: wallet.ownerName || '',
       initialBalance: wallet.balance,
       isActive: wallet.isActive,
+      allowedOperations: wallet.allowedOperations && wallet.allowedOperations.length > 0
+        ? wallet.allowedOperations
+        : [WalletOperationType.CashIn, WalletOperationType.CashOut],
     });
     setIsDrawerOpen(true);
   };
+
   const onSubmit = (data: WalletFormValues) => {
     if (editingWallet) {
       updateWallet(
@@ -61,6 +99,7 @@ export function WalletsAdminPage() {
             phoneNumber: data.phoneNumber,
             ownerName: data.ownerName || undefined,
             isActive: data.isActive,
+            allowedOperations: data.allowedOperations,
             image: data.image?.[0]
           }
         },
@@ -73,12 +112,14 @@ export function WalletsAdminPage() {
           phoneNumber: data.phoneNumber,
           ownerName: data.ownerName || undefined,
           initialBalance: data.initialBalance || 0,
+          allowedOperations: data.allowedOperations,
           image: data.image?.[0]
         },
         { onSuccess: () => setIsDrawerOpen(false) }
       );
     }
   };
+
   const closeDrawer = () => {
     setIsDrawerOpen(false);
     setEditingWallet(null);
@@ -145,6 +186,7 @@ export function WalletsAdminPage() {
               <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
                 <tr>
                   <th className="px-6 py-4 font-semibold whitespace-nowrap">اسم المحفظة</th>
+                  <th className="px-6 py-4 font-semibold whitespace-nowrap">العمليات المتاحة</th>
                   <th className="px-6 py-4 font-semibold whitespace-nowrap">رقم التليفون</th>
                   <th className="px-6 py-4 font-semibold whitespace-nowrap">اسم المالك</th>
                   <th className="px-6 py-4 font-semibold whitespace-nowrap">الرصيد الحالي</th>
@@ -170,6 +212,27 @@ export function WalletsAdminPage() {
                           </div>
                         )}
                         <span>{wallet.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {(wallet.allowedOperations && wallet.allowedOperations.length > 0
+                          ? wallet.allowedOperations
+                          : [WalletOperationType.CashIn, WalletOperationType.CashOut]
+                        ).map(op => (
+                          <span
+                            key={op}
+                            className={`px-2 py-0.5 text-xs font-semibold rounded-md ${
+                              op === WalletOperationType.CashIn
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : op === WalletOperationType.CashOut
+                                ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                : 'bg-blue-50 text-blue-700 border border-blue-200'
+                            }`}
+                          >
+                            {op === WalletOperationType.CashIn ? 'بيع' : op === WalletOperationType.CashOut ? 'سحب' : 'رصيد'}
+                          </span>
+                        ))}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-slate-500 whitespace-nowrap" dir="ltr">{wallet.phoneNumber}</td>
@@ -248,6 +311,38 @@ export function WalletsAdminPage() {
               className={tokens.input}
               placeholder="مثال: أحمد محمد"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              نوع المحفظة (العمليات المتاحة) *
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { type: WalletOperationType.CashIn, label: 'بيع', desc: 'إيداع رصيد للعميل' },
+                { type: WalletOperationType.CashOut, label: 'سحب', desc: 'سحب كاش من العميل' },
+                { type: WalletOperationType.Recharge, label: 'رصيد', desc: 'شحن رصيد هوائي' },
+              ].map(op => {
+                const isSelected = selectedOps.includes(op.type);
+                return (
+                  <button
+                    key={op.type}
+                    type="button"
+                    onClick={() => toggleOperation(op.type)}
+                    className={`p-3 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                      isSelected
+                        ? 'border-[#0f8e4c] bg-[#e6f4ed] text-[#0f8e4c] font-bold shadow-sm ring-1 ring-[#0f8e4c]'
+                        : 'border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className="text-sm font-bold">{op.label}</span>
+                    <span className="text-[10px] opacity-75">{op.desc}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {form.formState.errors.allowedOperations && (
+              <p className="text-red-500 text-xs mt-1.5">{form.formState.errors.allowedOperations.message}</p>
+            )}
           </div>
           {!editingWallet && (
             <div>

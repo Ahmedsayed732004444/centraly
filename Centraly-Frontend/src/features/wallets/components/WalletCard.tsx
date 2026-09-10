@@ -1,13 +1,22 @@
-import { Wallet, Coins, ArrowUpFromLine, ArrowDownToLine } from 'lucide-react';
-import { WalletResponse } from '../schemas/walletSchemas';
+import { Wallet, Coins, ArrowUpFromLine, ArrowDownToLine, Smartphone } from 'lucide-react';
+import { WalletResponse, WalletOperationType } from '../schemas/walletSchemas';
 
 interface WalletCardProps {
   wallet: WalletResponse;
   onCashIn: (wallet: WalletResponse) => void;
   onCashOut: (wallet: WalletResponse) => void;
+  onRecharge: (wallet: WalletResponse) => void;
 }
 
-export function WalletCard({ wallet, onCashIn, onCashOut }: WalletCardProps) {
+export function WalletCard({ wallet, onCashIn, onCashOut, onRecharge }: WalletCardProps) {
+  const allowedOps = wallet.allowedOperations && wallet.allowedOperations.length > 0
+    ? wallet.allowedOperations
+    : [WalletOperationType.CashIn, WalletOperationType.CashOut];
+
+  const hasCashIn = allowedOps.includes(WalletOperationType.CashIn);
+  const hasCashOut = allowedOps.includes(WalletOperationType.CashOut);
+  const hasRecharge = allowedOps.includes(WalletOperationType.Recharge);
+
   return (
     <div 
       className="bg-white rounded-2xl border border-gray-100 hover:border-gray-300 hover:shadow-md transition-all overflow-hidden flex flex-col p-4 sm:p-5 relative"
@@ -35,21 +44,37 @@ export function WalletCard({ wallet, onCashIn, onCashOut }: WalletCardProps) {
           الرصيد: {Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(wallet.balance)}
         </div>
 
-        <div className="w-full flex gap-2 sm:gap-3">
-          <button 
-            onClick={() => onCashOut(wallet)}
-            className="flex-1 py-2 sm:py-3 rounded-xl text-sm sm:text-[15px] font-bold flex items-center justify-center gap-2 transition-all bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 hover:border-red-300 shadow-sm"
-          >
-            <ArrowUpFromLine size={18} />
-            سحب
-          </button>
-          <button 
-            onClick={() => onCashIn(wallet)}
-            className="flex-1 py-2 sm:py-3 rounded-xl text-sm sm:text-[15px] font-bold flex items-center justify-center gap-2 transition-all bg-[#0f8e4c] hover:bg-[#0c7a40] text-white shadow-sm"
-          >
-            <ArrowDownToLine size={18} />
-            إيداع
-          </button>
+        <div className="w-full flex gap-2">
+          {hasCashOut && (
+            <button 
+              onClick={() => onCashOut(wallet)}
+              className="flex-1 py-2 sm:py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 hover:border-red-300 shadow-sm"
+              title="عملية سحب"
+            >
+              <ArrowUpFromLine size={16} />
+              سحب
+            </button>
+          )}
+          {hasCashIn && (
+            <button 
+              onClick={() => onCashIn(wallet)}
+              className="flex-1 py-2 sm:py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all bg-[#0f8e4c] hover:bg-[#0c7a40] text-white shadow-sm"
+              title="عملية بيع"
+            >
+              <ArrowDownToLine size={16} />
+              بيع
+            </button>
+          )}
+          {hasRecharge && (
+            <button 
+              onClick={() => onRecharge(wallet)}
+              className="flex-1 py-2 sm:py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100 hover:border-blue-300 shadow-sm"
+              title="شحن رصيد"
+            >
+              <Smartphone size={16} />
+              رصيد
+            </button>
+          )}
         </div>
       </div>
     </div>

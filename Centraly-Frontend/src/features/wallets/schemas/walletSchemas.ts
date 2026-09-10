@@ -1,6 +1,7 @@
 export enum WalletOperationType {
   CashIn = 1,
   CashOut = 2,
+  Recharge = 3,
 }
 
 export interface WalletResponse {
@@ -11,6 +12,7 @@ export interface WalletResponse {
   balance: number;
   imageUrl: string | null;
   isActive: boolean;
+  allowedOperations: WalletOperationType[];
   createdAt: string;
 }
 
@@ -19,6 +21,7 @@ export interface CreateWalletRequest {
   phoneNumber: string;
   ownerName?: string | null;
   initialBalance: number;
+  allowedOperations?: WalletOperationType[];
   image: File;
 }
 
@@ -46,6 +49,7 @@ export interface UpdateWalletRequest {
   phoneNumber: string;
   ownerName?: string | null;
   isActive: boolean;
+  allowedOperations?: WalletOperationType[];
   image?: File;
 }
 

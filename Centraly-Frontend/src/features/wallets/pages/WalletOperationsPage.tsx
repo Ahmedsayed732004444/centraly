@@ -105,6 +105,7 @@ export function WalletOperationsPage() {
                 wallet={wallet}
                 onCashIn={(w) => openOperationModal(w, WalletOperationType.CashIn)}
                 onCashOut={(w) => openOperationModal(w, WalletOperationType.CashOut)}
+                onRecharge={(w) => openOperationModal(w, WalletOperationType.Recharge)}
               />
             ))}
           </div>

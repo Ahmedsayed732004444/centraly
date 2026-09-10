@@ -1,8 +1,8 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useWalletDetails } from '../hooks/useWalletDetails';
 import { useHeaderStore } from '@/shared/hooks/useHeaderStore';
-import { Wallet, ArrowDownToLine, ArrowUpFromLine, ChevronLeft, ChevronRight, TrendingUp, Filter } from 'lucide-react';
+import { Wallet, ArrowDownToLine, ArrowUpFromLine, ChevronLeft, ChevronRight, TrendingUp, Filter, Smartphone } from 'lucide-react';
 import { formatDate, toUtcStartOfDayISOString, toUtcEndOfDayISOString } from '@/shared/utils/date';
 import { WalletOperationType, WalletOperationResponse } from '../schemas/walletSchemas';
 import { tokens } from '@/shared/styles/tokens';
@@ -89,8 +89,9 @@ export function WalletDetailsPage() {
                 className="bg-transparent border-none text-sm focus:ring-0 text-gray-600 py-0 w-full"
               >
                 <option value="">كل العمليات</option>
-                <option value={WalletOperationType.CashIn}>إيداع</option>
+                <option value={WalletOperationType.CashIn}>بيع</option>
                 <option value={WalletOperationType.CashOut}>سحب</option>
+                <option value={WalletOperationType.Recharge}>رصيد</option>
               </select>
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -131,13 +132,20 @@ export function WalletDetailsPage() {
               <tbody className="divide-y divide-slate-50">
                 {operations.map((op: WalletOperationResponse) => {
                   const isDeposit = op.operationType === WalletOperationType.CashIn;
+                  const isRecharge = op.operationType === WalletOperationType.Recharge;
                   return (
                     <tr key={op.id} className="hover:bg-slate-50/50">
                       <td className="px-6 py-4 text-slate-600 whitespace-nowrap">{formatDate(op.createdAt)}</td>
                       <td className="px-6 py-4">
-                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap ${isDeposit ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'}`}>
-                          {isDeposit ? <ArrowDownToLine size={14} /> : <ArrowUpFromLine size={14} />}
-                          {isDeposit ? 'إيداع' : 'سحب'}
+                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap ${
+                          isRecharge
+                            ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                            : isDeposit
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-rose-50 text-rose-700 border border-rose-200'
+                        }`}>
+                          {isRecharge ? <Smartphone size={14} /> : isDeposit ? <ArrowDownToLine size={14} /> : <ArrowUpFromLine size={14} />}
+                          {isRecharge ? 'رصيد' : isDeposit ? 'بيع' : 'سحب'}
                         </div>
                       </td>
                       <td className="px-6 py-4 font-mono font-medium text-slate-700 whitespace-nowrap">{op.transferredAmount.toFixed(2)}</td>

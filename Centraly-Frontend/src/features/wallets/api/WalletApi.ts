@@ -1,4 +1,4 @@
-﻿import { apiClient } from "@/lib/axios";
+import { apiClient } from "@/lib/axios";
 import {
   WalletResponse,
   CreateWalletRequest,
@@ -43,6 +43,11 @@ export class WalletApi {
     if (reqData.ownerName) formData.append("OwnerName", reqData.ownerName);
     formData.append("InitialBalance", reqData.initialBalance.toString());
     formData.append("Image", reqData.image);
+    if (reqData.allowedOperations && reqData.allowedOperations.length > 0) {
+      reqData.allowedOperations.forEach(op => {
+        formData.append("AllowedOperations", op.toString());
+      });
+    }
 
     const { data } = await apiClient.post<WalletResponse>("/wallets", formData, {
       headers: { "Content-Type": "multipart/form-data" },
@@ -57,6 +62,11 @@ export class WalletApi {
     if (reqData.ownerName) formData.append("OwnerName", reqData.ownerName);
     formData.append("IsActive", reqData.isActive.toString());
     if (reqData.image) formData.append("Image", reqData.image);
+    if (reqData.allowedOperations && reqData.allowedOperations.length > 0) {
+      reqData.allowedOperations.forEach(op => {
+        formData.append("AllowedOperations", op.toString());
+      });
+    }
 
     const { data } = await apiClient.put<WalletResponse>(`/wallets/${walletId}`, formData, {
       headers: { "Content-Type": "multipart/form-data" },

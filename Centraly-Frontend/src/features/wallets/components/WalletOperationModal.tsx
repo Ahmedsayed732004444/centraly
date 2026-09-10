@@ -1,6 +1,7 @@
-import { X, CreditCard, Banknote } from 'lucide-react';
+import { X, CreditCard, Banknote, Smartphone } from 'lucide-react';
 import { tokens } from '@/shared/styles/tokens';
 import { WalletResponse, WalletOperationType } from '../schemas/walletSchemas';
+
 interface WalletOperationModalProps {
   isOpen: boolean;
   selectedWallet: WalletResponse | null;
@@ -11,6 +12,7 @@ interface WalletOperationModalProps {
   onClose: () => void;
   isProcessing: boolean;
 }
+
 export function WalletOperationModal({
   isOpen,
   selectedWallet,
@@ -22,6 +24,41 @@ export function WalletOperationModal({
   isProcessing
 }: WalletOperationModalProps) {
   if (!isOpen || !selectedWallet) return null;
+
+  const isRecharge = operationType === WalletOperationType.Recharge;
+  const isCashIn = operationType === WalletOperationType.CashIn;
+  const isCashOut = operationType === WalletOperationType.CashOut;
+
+  const title = isRecharge 
+    ? 'عملية شحن رصيد' 
+    : isCashIn 
+    ? 'عملية بيع' 
+    : 'عملية سحب';
+
+  const headerBg = isRecharge
+    ? 'bg-blue-600'
+    : isCashOut
+    ? 'bg-rose-600'
+    : 'bg-[#0f8e4c]';
+
+  const btnBg = isRecharge
+    ? 'bg-blue-600 hover:bg-blue-700'
+    : isCashOut
+    ? 'bg-rose-600 hover:bg-rose-700'
+    : 'bg-[#0f8e4c] hover:bg-[#0c7a40]';
+
+  const transferredLabel = isRecharge
+    ? 'اتشحن بكام للزبون؟ (القيمة اللي راحت لرصيد العميل) *'
+    : isCashIn
+    ? 'هتحول كام للمحفظة؟ *'
+    : 'الزبون حولك كام؟ *';
+
+  const physicalCashLabel = isRecharge
+    ? 'الزبون دفعلك كام كاش؟ *'
+    : isCashIn
+    ? 'أخدت كاش كام من الزبون؟ *'
+    : 'هتدي للزبون كاش كام؟ *';
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
@@ -31,11 +68,17 @@ export function WalletOperationModal({
         className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto overflow-x-hidden animate-in fade-in zoom-in-95 duration-200"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="p-4 text-white flex justify-between items-center gap-3 bg-[#0f8e4c]">
+        <div className={`p-4 text-white flex justify-between items-center gap-3 ${headerBg}`}>
           <h2 className="text-base sm:text-lg font-bold flex items-center gap-2 min-w-0">
-            {operationType === WalletOperationType.CashIn ? <CreditCard size={20} className="shrink-0" /> : <Banknote size={20} className="shrink-0" />}
+            {isRecharge ? (
+              <Smartphone size={20} className="shrink-0" />
+            ) : isCashIn ? (
+              <CreditCard size={20} className="shrink-0" />
+            ) : (
+              <Banknote size={20} className="shrink-0" />
+            )}
             <span className="truncate">
-              {operationType === WalletOperationType.CashIn ? 'عملية إيداع' : 'عملية سحب'} - {selectedWallet.name}
+              {title} - {selectedWallet.name}
             </span>
           </h2>
           <button onClick={onClose} className="text-white/80 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10 shrink-0">
@@ -46,14 +89,14 @@ export function WalletOperationModal({
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                {operationType === WalletOperationType.CashIn ? 'هتحول كام للمحفظة؟ *' : 'الزبون حولك كام؟ *'}
+                {transferredLabel}
               </label>
               <input
                 type="number"
                 step="0.01"
                 {...form.register('transferredAmount')}
                 onFocus={(e) => e.target.select()}
-                className={tokens.input + " h-12 text-xl font-mono text-center focus:ring-[#0f8e4c] focus:border-[#0f8e4c] bg-gray-50"}
+                className={tokens.input + " h-12 text-xl font-mono text-center bg-gray-50"}
                 placeholder="0.00"
               />
               {form.formState?.errors?.transferredAmount && (
@@ -62,14 +105,14 @@ export function WalletOperationModal({
             </div>
             <div className="flex-1">
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                {operationType === WalletOperationType.CashIn ? 'أخدت كاش كام من الزبون؟ *' : 'هتدي للزبون كاش كام؟ *'}
+                {physicalCashLabel}
               </label>
               <input
                 type="number"
                 step="0.01"
                 {...form.register('physicalCashAmount')}
                 onFocus={(e) => e.target.select()}
-                className={tokens.input + " h-12 text-xl font-mono text-center focus:ring-[#0f8e4c] focus:border-[#0f8e4c] bg-gray-50"}
+                className={tokens.input + " h-12 text-xl font-mono text-center bg-gray-50"}
                 placeholder="0.00"
               />
               {form.formState?.errors?.physicalCashAmount && (
@@ -81,7 +124,7 @@ export function WalletOperationModal({
             <label className="block text-sm font-bold text-gray-700 mb-2">رقم الموبايل / ملاحظات (اختياري)</label>
             <input
               {...form.register('notes')}
-              className={tokens.input + " h-10 focus:ring-[#0f8e4c] focus:border-[#0f8e4c]"}
+              className={tokens.input + " h-10"}
               placeholder="ملاحظات..."
             />
           </div>
@@ -100,7 +143,7 @@ export function WalletOperationModal({
             <button
               type="submit"
               disabled={isProcessing}
-              className={`flex-[2] px-4 py-3 text-white rounded-xl font-bold transition-colors disabled:opacity-60 text-sm bg-[#0f8e4c] hover:bg-[#0c7a40]`}
+              className={`flex-[2] px-4 py-3 text-white rounded-xl font-bold transition-colors disabled:opacity-60 text-sm ${btnBg}`}
             >
               {isProcessing ? 'جاري التنفيذ...' : 'تأكيد العملية'}
             </button>
