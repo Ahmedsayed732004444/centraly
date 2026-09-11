@@ -13,6 +13,7 @@ export function OpenDrawerForm({ type = 1 }: { type?: number }) {
     formState: { errors },
   } = useForm<OpenSessionRequest>({
     resolver: zodResolver(openSessionSchema),
+    mode: 'onBlur',
     defaultValues: { openingBalance: 0 }
   });
   const onSubmit = (data: OpenSessionRequest) => {

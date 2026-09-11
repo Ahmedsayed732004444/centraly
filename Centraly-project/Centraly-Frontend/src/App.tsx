@@ -8,48 +8,55 @@ import { FinancePoliciesPage } from './features/finance/pages/FinancePoliciesPag
 import { AppLayout } from "./shared/components/layout/AppLayout";
 import { PageLoader } from "./shared/components/ui/PageLoader";
 import { FeatureBoundaryLayout } from "./shared/components/errors/FeatureBoundaryLayout";
-// Lazy Loaded Pages
+import { routeImporters } from "./routes/routeImporters";
+// Lazy Loaded Pages - each import() lives once in routeImporters.ts so the Sidebar can
+// call the exact same function on link hover to prefetch the chunk ahead of the click.
 const LoginPage = lazy(() => import("./features/auth/pages/LoginPage").then(module => ({ default: module.LoginPage })));
-const DashboardPage = lazy(() => import("./features/dashboard/pages/DashboardPage").then(module => ({ default: module.DashboardPage })));
-const ProductsPage = lazy(() => import("./features/inventory/pages/ProductsPage").then(module => ({ default: module.ProductsPage })));
-const ProductDetailsPage = lazy(() => import("./features/inventory/pages/ProductDetailsPage").then(module => ({ default: module.ProductDetailsPage })));
-const CategoriesPage = lazy(() => import("./features/inventory/pages/CategoriesPage").then(module => ({ default: module.CategoriesPage })));
-const PosPage = lazy(() => import("./features/sales/pages/PosPage").then(module => ({ default: module.PosPage })));
-const SalesHistoryPage = lazy(() => import("./features/sales/pages/SalesHistoryPage").then(module => ({ default: module.SalesHistoryPage })));
-const SalesReturnsPage = lazy(() => import("./features/sales/pages/SalesReturnsPage").then(module => ({ default: module.SalesReturnsPage })));
-const NewSalesReturnPage = lazy(() => import("./features/sales/pages/NewSalesReturnPage").then(module => ({ default: module.NewSalesReturnPage })));
-const PurchasesHistoryPage = lazy(() => import("./features/purchases/pages/PurchasesHistoryPage").then(module => ({ default: module.PurchasesHistoryPage })));
-const NewPurchasePage = lazy(() => import("./features/purchases/pages/NewPurchasePage").then(module => ({ default: module.NewPurchasePage })));
-const PurchaseInvoiceDetailsPage = lazy(() => import("./features/purchases/pages/PurchaseInvoiceDetailsPage").then(module => ({ default: module.PurchaseInvoiceDetailsPage })));
-const SupplierReturnsPage = lazy(() => import("./features/purchases/pages/SupplierReturnsPage").then(module => ({ default: module.SupplierReturnsPage })));
-const SupplierReturnDetailsPage = lazy(() => import("./features/purchases/pages/SupplierReturnDetailsPage").then(module => ({ default: module.SupplierReturnDetailsPage })));
-const NewSupplierReturnPage = lazy(() => import("./features/purchases/pages/NewSupplierReturnPage").then(module => ({ default: module.NewSupplierReturnPage })));
-const CustomersPage = lazy(() => import("./features/contacts/pages/CustomersPage").then(module => ({ default: module.CustomersPage })));
-const CustomerDetailsPage = lazy(() => import("./features/contacts/pages/CustomerDetailsPage").then(module => ({ default: module.CustomerDetailsPage })));
-const SuppliersPage = lazy(() => import("./features/suppliers/pages/SuppliersPage").then(module => ({ default: module.SuppliersPage })));
-const SupplierDetailsPage = lazy(() => import("./features/suppliers/pages/SupplierDetailsPage").then(module => ({ default: module.SupplierDetailsPage })));
-const DrawerPage = lazy(() => import("./features/finance/pages/DrawerPage").then(module => ({ default: module.DrawerPage })));
-const DrawerHistoryPage = lazy(() => import("./features/finance/pages/DrawerHistoryPage").then(module => ({ default: module.DrawerHistoryPage })));
-const DrawerSessionDetailsPage = lazy(() => import("./features/finance/pages/DrawerSessionDetailsPage").then(module => ({ default: module.DrawerSessionDetailsPage })));
-const SafePage = lazy(() => import("./features/finance/pages/SafePage").then(module => ({ default: module.SafePage })));
-const ExpensesPage = lazy(() => import("./features/finance/pages/ExpensesPage").then(module => ({ default: module.ExpensesPage })));
-const OwnerTransactionsPage = lazy(() => import("./features/finance/pages/OwnerTransactionsPage").then(module => ({ default: module.OwnerTransactionsPage })));
-const WalletsAdminPage = lazy(() => import("./features/wallets/pages/WalletsAdminPage").then(module => ({ default: module.WalletsAdminPage })));
-const WalletOperationsPage = lazy(() => import("./features/wallets/pages/WalletOperationsPage").then(module => ({ default: module.WalletOperationsPage })));
-const WalletDetailsPage = lazy(() => import("./features/wallets/pages/WalletDetailsPage").then(module => ({ default: module.WalletDetailsPage })));
-const MaintenancePage = lazy(() => import("./features/maintenance/pages/MaintenancePage").then(module => ({ default: module.MaintenancePage })));
+const DashboardPage = lazy(routeImporters.dashboard);
+const ProductsPage = lazy(routeImporters.products);
+const ProductDetailsPage = lazy(routeImporters.productDetails);
+const CategoriesPage = lazy(routeImporters.categories);
+const PosPage = lazy(routeImporters.posPage);
+const SalesHistoryPage = lazy(routeImporters.salesHistory);
+const SalesReturnsPage = lazy(routeImporters.salesReturns);
+const NewSalesReturnPage = lazy(routeImporters.newSalesReturn);
+const PurchasesHistoryPage = lazy(routeImporters.purchasesHistory);
+const NewPurchasePage = lazy(routeImporters.newPurchase);
+const PurchaseInvoiceDetailsPage = lazy(routeImporters.purchaseInvoiceDetails);
+const SupplierReturnsPage = lazy(routeImporters.supplierReturns);
+const SupplierReturnDetailsPage = lazy(routeImporters.supplierReturnDetails);
+const NewSupplierReturnPage = lazy(routeImporters.newSupplierReturn);
+const CustomersPage = lazy(routeImporters.customers);
+const CustomerDetailsPage = lazy(routeImporters.customerDetails);
+const SuppliersPage = lazy(routeImporters.suppliers);
+const SupplierDetailsPage = lazy(routeImporters.supplierDetails);
+const DrawerPage = lazy(routeImporters.drawer);
+const DrawerHistoryPage = lazy(routeImporters.drawerHistory);
+const DrawerSessionDetailsPage = lazy(routeImporters.drawerSessionDetails);
+const SafePage = lazy(routeImporters.safe);
+const ExpensesPage = lazy(routeImporters.expenses);
+const OwnerTransactionsPage = lazy(routeImporters.ownerTransactions);
+const WalletsAdminPage = lazy(routeImporters.walletsAdmin);
+const WalletOperationsPage = lazy(routeImporters.walletOperations);
+const WalletDetailsPage = lazy(routeImporters.walletDetails);
+const MaintenancePage = lazy(routeImporters.maintenance);
+const AnalyticsPage = lazy(routeImporters.analytics);
 
-const UsersPage = lazy(() => import("./features/admin/pages/UsersPage").then(module => ({ default: module.UsersPage })));
-const RolesPage = lazy(() => import("./features/admin/pages/RolesPage").then(module => ({ default: module.RolesPage })));
+const UsersPage = lazy(routeImporters.users);
+const RolesPage = lazy(routeImporters.roles);
 
-// Guard: redirects to /login if not authenticated, and checks permissions
+// Guard: redirects to /login if not authenticated, and checks role access.
+// requiredPermissions actually holds ROLE NAMES (e.g. ["Admin","Manager","Salesperson"]),
+// not fine-grained permission strings - matched via hasAnyRole (OR). Using hasPermission()
+// here (permission-string lookup) made every non-Admin role fail on every route, since a
+// role name like "Manager" is never itself a permission string.
 function ProtectedRoute({ children, requiredPermissions = [] }: { children: React.ReactNode, requiredPermissions?: string[] }) {
-  const { isAuthenticated, hasPermission } = useAuth();
-  
+  const { isAuthenticated, hasAnyRole } = useAuth();
+
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   if (requiredPermissions.length > 0) {
-    const hasAll = requiredPermissions.every(p => hasPermission(p));
+    const hasAll = hasAnyRole(requiredPermissions);
     if (!hasAll) {
       return (
         <div className="flex h-screen items-center justify-center bg-gray-50 flex-col gap-4 px-4 text-center">
@@ -138,6 +145,10 @@ export default function App() {
 
                 <Route element={<FeatureBoundaryLayout featureName="الصيانة" />}>
                   <Route path="/maintenance" element={<ProtectedRoute requiredPermissions={["Admin", "Manager", "Technician"]}><MaintenancePage /></ProtectedRoute>} />
+                </Route>
+
+                <Route element={<FeatureBoundaryLayout featureName="التحليلات" />}>
+                  <Route path="/analytics" element={<ProtectedRoute requiredPermissions={["Admin", "Manager"]}><AnalyticsPage /></ProtectedRoute>} />
                 </Route>
 
                 <Route element={<FeatureBoundaryLayout featureName="الإدارة والصلاحيات" />}>

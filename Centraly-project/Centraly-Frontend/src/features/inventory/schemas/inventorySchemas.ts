@@ -110,3 +110,17 @@ export interface ProductResponse {
 export function isMaintenanceProduct(usage?: ProductUsageDto): boolean {
   return usage === ProductUsageDto.MaintenanceOnly || usage === ProductUsageDto.SaleAndMaintenance;
 }
+
+/**
+ * The maintenance price to prefill when a part is added to a ticket. `batches[0]` is
+ * not safe to use directly - a product can carry a zero-priced batch created by a
+ * stock adjustment (AdjustQuantityAsync always sets MaintenancePrice = 0), and batches
+ * come back in no guaranteed order, so the picker could land on that batch instead of
+ * a real purchase one. This picks the most recently received batch that actually has a
+ * price set, falling back to 0 only if none do.
+ */
+export function getMaintenancePrice(product: Pick<ProductResponse, 'batches'>): number {
+  const priced = (product.batches || []).filter((b) => b.maintenancePrice > 0);
+  if (priced.length === 0) return 0;
+  return priced.reduce((latest, b) => (new Date(b.dateReceived) > new Date(latest.dateReceived) ? b : latest)).maintenancePrice;
+}

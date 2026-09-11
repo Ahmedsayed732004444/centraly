@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDrawerSessionById } from '../hooks/useFinance';
 import { PageLoader } from '@/shared/components/ui/PageLoader';
@@ -6,14 +6,23 @@ import { formatCurrency } from '@/shared/utils/currency';
 import { formatDate } from '@/shared/utils/date';
 import { DrawerTransactionsTable } from '../components/DrawerTransactionsTable';
 import { CloseDrawerModal } from '../components/CloseDrawerModal';
-import { CheckCircle, Clock, ChevronRight, Wallet, Download } from 'lucide-react';
+import { CheckCircle, Clock, Download } from 'lucide-react';
 import { exportDrawerSessionToExcel } from '../utils/exportDrawerSessionExcel';
 import { tokens } from '@/shared/styles/tokens';
+import { useHeaderStore } from '@/shared/hooks/useHeaderStore';
 export function DrawerSessionDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
   const { data: session, isLoading, isError } = useDrawerSessionById(id!);
+  const { setTitle, setBackButton } = useHeaderStore();
+
+  useEffect(() => {
+    setTitle('تفاصيل الوردية');
+    setBackButton(true, '/finance/drawer/history');
+    return () => setBackButton(false);
+  }, [setTitle, setBackButton]);
+
   if (isLoading) return <PageLoader />;
   if (isError || !session) {
     return (
@@ -29,23 +38,7 @@ export function DrawerSessionDetailsPage() {
     <div className="space-y-6 w-full">
       {}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate('/finance/drawer/history')}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors shrink-0"
-          >
-            <ChevronRight className="w-6 h-6 text-gray-600" />
-          </button>
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-              <Wallet className="w-6 h-6 text-blue-600" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 truncate">تفاصيل الوردية</h1>
-              <p className="text-gray-500 text-sm">عرض شامل لحركات الدرج والرصيد</p>
-            </div>
-          </div>
-        </div>
+        <p className="text-gray-500 text-sm">عرض شامل لحركات الدرج والرصيد</p>
         {session.isClosed ? (
           <div className="flex flex-wrap items-center gap-3">
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-700 border border-gray-200">

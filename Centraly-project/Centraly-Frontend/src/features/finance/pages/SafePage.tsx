@@ -6,6 +6,12 @@ import { ManualSafeTransactionModal } from '../components/ManualSafeTransactionM
 import { PageLoader } from '@/shared/components/ui/PageLoader';
 import { formatCurrency } from '@/shared/utils/currency';
 import { Vault, PlusCircle, ArrowDownToLine } from 'lucide-react';
+import { ExportExcelButton } from '@/shared/components/ui/ExportExcelButton';
+import { exportToExcel } from '@/shared/utils/exportToExcel';
+import { normalizePaginated } from '@/shared/utils/fetchAllPages';
+import { SafeTransactionResponse } from '../schemas/financeSchemas';
+import { safeTxDirection } from '@/shared/utils/moneyDirection';
+import { formatDateTime } from '@/shared/utils/date';
 export function SafePage() {
   const { data: safes, isLoading: safesLoading } = useSafes();
   const mainSafe = safes?.find(s => s.isMain) || safes?.[0];
@@ -58,9 +64,30 @@ export function SafePage() {
         </div>
       </div>
       <div>
-        <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-          سجل حركات الخزينة
-        </h3>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-800 flex items-center gap-2">
+            سجل حركات الخزينة
+          </h3>
+          <ExportExcelButton
+            onExport={async () => {
+              const rows = normalizePaginated(transactionsData || []).items;
+              await exportToExcel<SafeTransactionResponse>({
+                fileName: 'سجل-حركات-الخزينة',
+                sheetName: 'الخزينة',
+                title: `سجل حركات ${mainSafe?.name || 'الخزينة'}`,
+                columns: [
+                  { header: 'التاريخ', value: (r) => formatDateTime(r.createdAt) },
+                  { header: 'النوع', value: (r) => (safeTxDirection(r.transactionType) === 'in' ? 'إيداع' : 'صادر') },
+                  { header: 'التصنيف', value: (r) => r.category || '-' },
+                  { header: 'المبلغ', value: (r) => (safeTxDirection(r.transactionType) === 'in' ? r.amount : -r.amount), money: true },
+                  { header: 'الرصيد بعد الحركة', value: (r) => r.balanceAfter, money: true },
+                  { header: 'ملاحظات', value: (r) => r.notes || '-', width: 30, align: 'right' },
+                ],
+                rows,
+              });
+            }}
+          />
+        </div>
         <SafeTransactionsTable transactions={transactionsData || []} />
       </div>
       {isDepositModalOpen && safeId && (

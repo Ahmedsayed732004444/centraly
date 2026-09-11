@@ -1,4 +1,5 @@
 import { formatCurrency } from '@/shared/utils/currency';
+import { formatDateOnly } from '@/shared/utils/date';
 import { tokens } from '@/shared/styles/tokens';
 import { SupplierResponse } from '../schemas/supplierSchemas';
 import { Phone, MapPin, Tag, CreditCard } from 'lucide-react';
@@ -72,7 +73,7 @@ export function SupplierOverviewCard({ supplier, onPay }: SupplierOverviewCardPr
           </div>
         </div>
         <div className="text-center mt-2">
-          <span className="text-xs text-gray-400">تاريخ الإضافة: {new Intl.DateTimeFormat('ar-EG').format(new Date(supplier.createdAt))}</span>
+          <span className="text-xs text-gray-400">تاريخ الإضافة: {formatDateOnly(supplier.createdAt)}</span>
         </div>
       </div>
     </div>

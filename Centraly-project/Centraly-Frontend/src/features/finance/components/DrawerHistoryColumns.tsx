@@ -1,6 +1,7 @@
 import { formatCurrency } from '@/shared/utils/currency';
-import { formatDate } from '@/shared/utils/date';
+import { formatDateTime } from '@/shared/utils/date';
 import { CheckCircle } from 'lucide-react';
+import { Badge } from '@/shared/components/ui/Badge';
 
 export const getDrawerHistoryColumns = () => [
   {
@@ -14,22 +15,18 @@ export const getDrawerHistoryColumns = () => [
   {
     header: 'الحالة',
     cell: (item: any) => item.isClosed ? (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium bg-gray-100 text-gray-700">
-        <CheckCircle className="w-4 h-4" /> مغلقة
-      </span>
+      <Badge variant="neutral" icon={<CheckCircle className="w-4 h-4" />}>مغلقة</Badge>
     ) : (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium bg-green-100 text-green-700">
-        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> جارية الآن
-      </span>
+      <Badge variant="success" icon={<span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />}>جارية الآن</Badge>
     )
   },
   {
     header: 'وقت الفتح',
-    cell: (item: any) => <span dir="ltr">{formatDate(item.openedAt)}</span>
+    cell: (item: any) => <span dir="ltr">{formatDateTime(item.openedAt)}</span>
   },
   {
     header: 'وقت الإغلاق',
-    cell: (item: any) => item.closedAt ? <span dir="ltr">{formatDate(item.closedAt)}</span> : '-'
+    cell: (item: any) => item.closedAt ? <span dir="ltr">{formatDateTime(item.closedAt)}</span> : '-'
   },
   {
     header: 'الرصيد الافتتاحي',

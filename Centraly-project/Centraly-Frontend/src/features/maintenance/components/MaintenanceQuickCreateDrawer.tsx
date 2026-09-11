@@ -47,10 +47,10 @@ function formatArabicDelivery(isoString?: string) {
   const tomorrow = new Date(now);
   tomorrow.setDate(tomorrow.getDate() + 1);
   const isTomorrow = date.toDateString() === tomorrow.toDateString();
-  const timePart = date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const timePart = date.toLocaleTimeString('ar-EG-u-nu-latn', { hour: '2-digit', minute: '2-digit', hour12: true });
   if (isToday) return `اليوم، ${timePart}`;
   if (isTomorrow) return `غداً، ${timePart}`;
-  return date.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', hour12: true });
+  return date.toLocaleDateString('ar-EG-u-nu-latn', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', hour12: true });
 }
 export function MaintenanceQuickCreateDrawer({ isOpen, onClose, onCreated }: Props) {
   const { mutate: createMaintenance, isPending } = useCreateMaintenance();
@@ -63,6 +63,7 @@ export function MaintenanceQuickCreateDrawer({ isOpen, onClose, onCreated }: Pro
   });
   const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm<CreateMaintenanceRequest>({
     resolver: zodResolver(createMaintenanceSchema) as any,
+    mode: 'onBlur',
     defaultValues: {
       customerName: '', customerPhone: '', customerId: '',
       deviceDescription: '', problem: '', paidAmount: 0, deliveryDate: '',

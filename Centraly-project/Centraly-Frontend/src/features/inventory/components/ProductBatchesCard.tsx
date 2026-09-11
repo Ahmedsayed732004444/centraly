@@ -1,5 +1,7 @@
 import { Calendar, Truck, Package, Plus, MoreHorizontal } from 'lucide-react';
 import { ProductResponse } from '@/features/inventory/schemas/inventorySchemas';
+import { formatDateOnly } from '@/shared/utils/date';
+import { formatNumber } from '@/shared/utils/currency';
 
 interface ProductBatchesCardProps {
   product: ProductResponse;
@@ -53,7 +55,7 @@ export function ProductBatchesCard({ product }: ProductBatchesCardProps) {
                     <div className="flex items-center gap-2 text-gray-600">
                       <Calendar size={14} className="text-gray-400" />
                       <span className="font-semibold text-gray-800 text-sm">
-                        {new Date(batch.dateReceived).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        {formatDateOnly(batch.dateReceived)}
                       </span>
                     </div>
                   </td>
@@ -63,13 +65,13 @@ export function ProductBatchesCard({ product }: ProductBatchesCardProps) {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-left font-mono font-bold text-gray-800 text-sm">
-                    {batch.purchasePrice.toLocaleString()} <span className="text-gray-400 text-xs">$</span>
+                    {formatNumber(batch.purchasePrice)} <span className="text-gray-400 text-xs">ج.م</span>
                   </td>
                   <td className="px-4 py-3 text-left font-mono font-bold text-amber-600 text-sm">
-                    {batch.wholesalePrice.toLocaleString()} <span className="text-amber-400 text-xs">$</span>
+                    {formatNumber(batch.wholesalePrice)} <span className="text-amber-400 text-xs">ج.م</span>
                   </td>
                   <td className="px-4 py-3 text-left font-mono font-bold text-emerald-600 text-base">
-                    {batch.retailPrice.toLocaleString()} <span className="text-emerald-400 text-xs">$</span>
+                    {formatNumber(batch.retailPrice)} <span className="text-emerald-400 text-xs">ج.م</span>
                   </td>
                   <td className="px-4 py-3 text-center">
                     <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors border border-transparent hover:border-gray-200">

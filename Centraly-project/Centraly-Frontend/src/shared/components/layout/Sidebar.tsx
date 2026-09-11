@@ -1,12 +1,19 @@
 import { Link, useLocation } from "react-router-dom";
-import { 
-  MonitorSmartphone, ShoppingCart, Wrench, Package, 
+import {
+  MonitorSmartphone, ShoppingCart, Wrench, Package,
   Users, Wallet, Settings, LogOut, ShoppingBag,
-  ChevronDown, ChevronUp, Grip, Zap, X
+  ChevronDown, ChevronUp, Menu, Zap, X, BarChart3, Home
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useSidebarStore } from "@/shared/hooks/useSidebarStore";
 import { useState } from "react";
+import { pathImporters } from "@/routes/routeImporters";
+
+// Fetches a route's JS chunk ahead of the click (on hover/focus, and on touchstart for
+// mobile where there's no hover) so navigating there doesn't sit behind the Suspense
+// spinner waiting on a network round-trip. Re-calling an already-resolved import() is a
+// free module-cache hit, so this is safe to fire on every hover.
+const prefetchRoute = (path: string) => pathImporters[path]?.();
 
 type MenuItem = {
   name: string;
@@ -96,6 +103,13 @@ const menuGroups: MenuGroup[] = [
     ]
   },
   {
+    title: "التحليلات",
+    allowedRoles: ADMIN_MANAGER,
+    items: [
+      { name: "لوحة التحليلات", path: "/analytics", icon: BarChart3, allowedRoles: ADMIN_MANAGER },
+    ]
+  },
+  {
     title: "الإدارة والصلاحيات",
     allowedRoles: ADMIN_MANAGER,
     items: [
@@ -141,12 +155,18 @@ export function Sidebar() {
                 onClick={toggle}
                 className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center justify-center shadow-md shadow-blue-600/20 text-white transition-all cursor-pointer focus:outline-none"
                 title="طي / فتح القائمة"
+                aria-label="طي / فتح القائمة"
               >
-                <Grip className="w-6 h-6 text-white" />
+                <Menu className="w-6 h-6 text-white" />
               </button>
-              <h1 className="text-2xl font-extrabold text-slate-800 tracking-wide select-none">
-                سنترالي
-              </h1>
+              {/* Clicking the brand always returns home - the one universal "go back to
+                  the start" affordance every screen shares, matching the pinned "الرئيسية"
+                  link below. */}
+              <Link to="/" onClick={closeOnMobile} className="select-none">
+                <h1 className="text-2xl font-extrabold text-slate-800 tracking-wide hover:text-blue-700 transition-colors">
+                  سنترالي
+                </h1>
+              </Link>
             </div>
             {/* Close button for mobile */}
             <button
@@ -165,10 +185,32 @@ export function Sidebar() {
             onClick={toggle}
             className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 flex items-center justify-center shadow-md shadow-blue-600/20 text-white transition-all cursor-pointer mx-auto focus:outline-none"
             title="توسيع القائمة"
+            aria-label="توسيع القائمة"
           >
-            <Grip className="w-6 h-6 text-white" />
+            <Menu className="w-6 h-6 text-white" />
           </button>
         )}
+      </div>
+
+      {/* Pinned Home link - every role can reach the Dashboard ("/") but no route in
+          the list below points to it, so without this there is no way back to the
+          dashboard except typing the URL. Kept outside the collapsible/scrollable
+          groups so it is always one click away. */}
+      <div className="px-4 pt-4 shrink-0" dir="rtl">
+        <Link
+          to="/"
+          onClick={closeOnMobile}
+          onMouseEnter={() => prefetchRoute("/")}
+          onFocus={() => prefetchRoute("/")}
+          onTouchStart={() => prefetchRoute("/")}
+          title={!isOpen ? "الرئيسية" : undefined}
+          className={`${isOpen ? 'gap-3 px-3.5' : 'justify-center px-0'} flex items-center py-3 rounded-xl transition-all duration-200 text-[15px] font-bold relative ${location.pathname === "/" ? "bg-blue-600 text-white shadow-sm" : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200/60"}`}
+        >
+          <Home size={22} strokeWidth={2.5} className={`${location.pathname === "/" ? "text-white" : "text-blue-600"} shrink-0`} />
+          <span className={`${isOpen ? 'opacity-100 w-auto' : 'opacity-0 w-0 hidden'} transition-all duration-300 whitespace-nowrap`}>
+            الرئيسية
+          </span>
+        </Link>
       </div>
 
       {/* Navigation Links */}
@@ -182,11 +224,11 @@ export function Sidebar() {
 
           return (
           <div key={gi} className="mb-6">
-            <div 
+            <div
               onClick={() => isOpen && toggleGroup(gi)}
-              className={`${isOpen ? 'cursor-pointer hover:text-slate-800' : ''} flex items-center justify-between px-3 mb-2 text-slate-400 group transition-colors`}
+              className={`${isOpen ? 'cursor-pointer hover:text-slate-700' : ''} flex items-center justify-between px-3 mb-2 text-slate-500 group transition-colors`}
             >
-              <h3 className={`${isOpen ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'} text-[13px] font-bold uppercase tracking-wider transition-all duration-300 select-none`}>
+              <h3 className={`${isOpen ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'} text-[13px] font-bold tracking-wide transition-all duration-300 select-none`}>
                 {group.title}
               </h3>
               {isOpen && (
@@ -206,6 +248,9 @@ export function Sidebar() {
                     <Link
                       to={item.path}
                       onClick={closeOnMobile}
+                      onMouseEnter={() => prefetchRoute(item.path)}
+                      onFocus={() => prefetchRoute(item.path)}
+                      onTouchStart={() => prefetchRoute(item.path)}
                       title={!isOpen ? item.name : undefined}
                       className={`${isOpen ? 'gap-3 px-3.5' : 'justify-center px-0'} flex items-center py-3 rounded-xl transition-all duration-200 text-[15px] font-semibold relative ${active ? "bg-white text-blue-700 shadow-sm border border-slate-200/60" : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900 border border-transparent"}`}
                     >
@@ -230,6 +275,9 @@ export function Sidebar() {
               <Link
                 to="/settings/finance-policies"
                 onClick={closeOnMobile}
+                onMouseEnter={() => prefetchRoute("/settings/finance-policies")}
+                onFocus={() => prefetchRoute("/settings/finance-policies")}
+                onTouchStart={() => prefetchRoute("/settings/finance-policies")}
                 title={!isOpen ? "سياسات النظام" : undefined}
                 className={`${isOpen ? 'gap-3 px-3.5' : 'justify-center px-0'} flex items-center py-3 rounded-xl transition-all duration-200 text-[15px] font-semibold relative ${location.pathname === "/settings/finance-policies" ? "bg-white text-blue-700 shadow-sm border border-slate-200/60" : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900 border border-transparent"}`}
               >
@@ -244,6 +292,9 @@ export function Sidebar() {
             <Link
               to="/settings/wallets"
               onClick={closeOnMobile}
+              onMouseEnter={() => prefetchRoute("/settings/wallets")}
+              onFocus={() => prefetchRoute("/settings/wallets")}
+              onTouchStart={() => prefetchRoute("/settings/wallets")}
               title={!isOpen ? "إدارة المحافظ" : undefined}
               className={`${isOpen ? 'gap-3 px-3.5' : 'justify-center px-0'} flex items-center py-3 rounded-xl transition-all duration-200 text-[15px] font-semibold relative ${location.pathname === "/settings/wallets" ? "bg-white text-blue-700 shadow-sm border border-slate-200/60" : "text-slate-600 hover:bg-slate-200/50 hover:text-slate-900 border border-transparent"}`}
             >

@@ -2,9 +2,12 @@
 import { PaginatedList } from '@/shared/types/pagination';
 import { DataTable } from '@/shared/components/ui/DataTable';
 import { formatCurrency } from '@/shared/utils/currency';
+import { formatDateOnly } from '@/shared/utils/date';
 import { Edit2, Trash2, Eye } from 'lucide-react';
-import { HasPermission } from '@/features/auth/components/HasPermission';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Permissions } from '@/features/auth/schemas/permissions';
+import { RowActions } from '@/shared/components/ui/RowActions';
+import { Avatar } from '@/shared/components/ui/Avatar';
 interface CustomersTableProps {
   data?: PaginatedList<CustomerResponse>;
   isLoading: boolean;
@@ -25,11 +28,16 @@ export function CustomersTable({
   onDelete,
   onRowClick
 }: CustomersTableProps) {
+  const { hasPermission } = useAuth();
+  const canWrite = hasPermission(Permissions.CustomersWrite);
   const columns = [
     {
       header: 'اسم العميل',
       cell: (row: CustomerResponse) => (
-        <span className="font-bold text-gray-800">{row.name}</span>
+        <div className="flex items-center gap-3">
+          <Avatar name={row.name} size="sm" />
+          <span className="font-medium text-gray-900">{row.name}</span>
+        </div>
       ),
     },
     {
@@ -40,49 +48,25 @@ export function CustomersTable({
       header: 'المديونية (الرصيد)',
       cell: (row: CustomerResponse) => {
         const balance = row.debtBalance || 0;
-        if (balance === 0) return <span className="text-gray-500 font-medium">0 ج.م</span>;
+        if (balance === 0) return <span className="text-gray-500 font-medium" dir="ltr">{formatCurrency(0)}</span>;
         if (balance > 0) return <span className="text-red-600 font-bold" dir="ltr">{formatCurrency(balance)}</span>;
         return <span className="text-green-600 font-bold" dir="ltr">{formatCurrency(Math.abs(balance))} (مقدم)</span>;
       },
     },
     {
       header: 'تاريخ الإضافة',
-      cell: (row: CustomerResponse) => new Date(row.createdAt).toLocaleDateString('ar-EG'),
+      cell: (row: CustomerResponse) => formatDateOnly(row.createdAt),
     },
     {
-      header: 'إجراءات',
+      header: 'الإجراءات',
       cell: (row: CustomerResponse) => (
-        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-          <button
-            type="button"
-            onClick={() => onRowClick(row)}
-            className="p-2.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
-            title="كشف حساب / التفاصيل"
-            aria-label="تفاصيل العميل"
-          >
-            <Eye size={18} />
-          </button>
-          <HasPermission permission={Permissions.CustomersWrite}>
-            <button
-              type="button"
-              onClick={() => onEdit(row)}
-              className="p-2.5 text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
-              title="تعديل"
-              aria-label="تعديل العميل"
-            >
-              <Edit2 size={18} />
-            </button>
-            <button
-              type="button"
-              onClick={() => onDelete(row)}
-              className="p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-              title="حذف"
-              aria-label="حذف العميل"
-            >
-              <Trash2 size={18} />
-            </button>
-          </HasPermission>
-        </div>
+        <RowActions
+          actions={[
+            { icon: Eye, label: 'كشف حساب / التفاصيل', onClick: () => onRowClick(row) },
+            { icon: Edit2, label: 'تعديل', onClick: () => onEdit(row), hidden: !canWrite },
+            { icon: Trash2, label: 'حذف', onClick: () => onDelete(row), tone: 'danger', hidden: !canWrite },
+          ]}
+        />
       ),
     },
   ];
@@ -98,6 +82,7 @@ export function CustomersTable({
       onNextPage={onNextPage}
       onPrevPage={onPrevPage}
       onRowClick={onRowClick}
+      emptyEntity="عملاء"
     />
   );
 }

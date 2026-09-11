@@ -1,20 +1,25 @@
 import { formatCurrency } from '@/shared/utils/currency';
-import { formatDate } from '@/shared/utils/date';
+import { formatDateTime } from '@/shared/utils/date';
 import { OwnerTransactionResponse } from '../schemas/financeSchemas';
+import { ownerTxDirection, directionStyles } from '@/shared/utils/moneyDirection';
+import { DirectionBadge } from '@/shared/components/ui/Badge';
 
 export const getOwnerTransactionsColumns = () => [
   {
     header: 'النوع',
-    cell: (row: OwnerTransactionResponse) => (
-      <span className={row.category === 10 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
-        {row.category === 10 ? 'إيداع رأس مال' : 'سحب أرباح'}
-      </span>
-    ),
+    cell: (row: OwnerTransactionResponse) => {
+      const direction = ownerTxDirection(row.category);
+      return (
+        <DirectionBadge direction={direction}>
+          {direction === 'in' ? 'إيداع رأس مال' : 'سحب أرباح'}
+        </DirectionBadge>
+      );
+    },
   },
   {
     header: 'المبلغ',
     cell: (row: OwnerTransactionResponse) => (
-      <span dir="ltr" className="font-semibold text-gray-800 inline-block">
+      <span dir="ltr" className={`font-semibold inline-block ${directionStyles[ownerTxDirection(row.category)].text}`}>
         {formatCurrency(row.amount)}
       </span>
     ),
@@ -31,7 +36,7 @@ export const getOwnerTransactionsColumns = () => [
     header: 'التاريخ',
     cell: (row: OwnerTransactionResponse) => (
       <span className="text-gray-600 text-sm">
-        {formatDate(row.createdAt)}
+        {formatDateTime(row.createdAt)}
       </span>
     ),
   },

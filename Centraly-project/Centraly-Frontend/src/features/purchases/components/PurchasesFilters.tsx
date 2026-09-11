@@ -1,7 +1,9 @@
 import { tokens } from '@/shared/styles/tokens';
 import { Search } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSuppliers } from '@/features/suppliers/hooks/useSuppliers';
+import { DateRangeFilter } from '@/shared/components/ui/DateRangeFilter';
+import { useDebounce } from '@/shared/hooks/useDebounce';
 interface PurchasesFiltersProps {
   onSearch: (searchTerm: string) => void;
   onSupplierChange: (supplierId: string) => void;
@@ -9,6 +11,7 @@ interface PurchasesFiltersProps {
 }
 export function PurchasesFilters({ onSearch, onSupplierChange, onDateChange }: PurchasesFiltersProps) {
   const [term, setTerm] = useState('');
+  const debouncedTerm = useDebounce(term, 500);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const { data: suppliersData } = useSuppliers({ pageNumber: 1, pageSize: 500 });
@@ -18,6 +21,12 @@ export function PurchasesFilters({ onSearch, onSupplierChange, onDateChange }: P
     setEndDate(end);
     onDateChange(start, end);
   };
+  // Debounced the same way sales history's search box is, so typing a purchase
+  // invoice number doesn't fire a request per keystroke.
+  useEffect(() => {
+    onSearch(debouncedTerm);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedTerm]);
   return (
     <div className={`${tokens.card} p-4 bg-white flex flex-col md:flex-row gap-4 md:justify-between md:items-center mb-6`}>
       <div className="relative w-full md:w-80">
@@ -27,10 +36,7 @@ export function PurchasesFilters({ onSearch, onSupplierChange, onDateChange }: P
           placeholder="ابحث برقم الفاتورة..."
           className={`${tokens.input} pl-3 pr-10 w-full`}
           value={term}
-          onChange={(e) => {
-            setTerm(e.target.value);
-            onSearch(e.target.value);
-          }}
+          onChange={(e) => setTerm(e.target.value)}
         />
       </div>
       <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3 sm:gap-4">
@@ -43,24 +49,7 @@ export function PurchasesFilters({ onSearch, onSupplierChange, onDateChange }: P
             <option key={s.supplierId} value={s.supplierId}>{s.name}</option>
           ))}
         </select>
-        {/* Date range stacks on phones so both inputs stay fully usable instead of being squeezed side by side */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-          <input
-            type="date"
-            className={`${tokens.input} w-full sm:w-auto`}
-            value={startDate}
-            onChange={(e) => handleDateChange(e.target.value, endDate)}
-            title="من تاريخ"
-          />
-          <span className="text-gray-500 hidden sm:inline">-</span>
-          <input
-            type="date"
-            className={`${tokens.input} w-full sm:w-auto`}
-            value={endDate}
-            onChange={(e) => handleDateChange(startDate, e.target.value)}
-            title="إلى تاريخ"
-          />
-        </div>
+        <DateRangeFilter startDate={startDate} endDate={endDate} onChange={handleDateChange} />
       </div>
     </div>
   );

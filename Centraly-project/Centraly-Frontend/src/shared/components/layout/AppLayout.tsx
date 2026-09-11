@@ -29,12 +29,31 @@ const defaultPageTitles: Record<string, string> = {
   "/finance/owner-transactions": "معاملات المالك",
   "/operations/wallets": "عمليات المحافظ",
   "/maintenance": "الصيانة",
+  "/analytics": "لوحة التحليلات",
   "/admin/users": "إدارة المستخدمين",
   "/admin/roles": "الأدوار والصلاحيات",
   "/settings": "الإعدادات",
   "/settings/finance-policies": "سياسات النظام",
   "/settings/wallets": "إدارة المحافظ",
 };
+
+// Exact match first, then longest-prefix match so a sub-route that isn't listed
+// explicitly (e.g. "/sales/returns/new") still inherits its section's title
+// ("مرتجعات المبيعات") instead of leaving the previous page's title on screen.
+function resolveDefaultTitle(pathname: string): string | undefined {
+  if (defaultPageTitles[pathname]) return defaultPageTitles[pathname];
+
+  let best: string | undefined;
+  let bestLength = 0;
+  for (const path of Object.keys(defaultPageTitles)) {
+    if (path === "/") continue;
+    if ((pathname === path || pathname.startsWith(`${path}/`)) && path.length > bestLength) {
+      best = defaultPageTitles[path];
+      bestLength = path.length;
+    }
+  }
+  return best;
+}
 
 export function AppLayout() {
   const location = useLocation();
@@ -47,7 +66,7 @@ export function AppLayout() {
 
   // Set default title based on route if available, and reset back button
   useEffect(() => {
-    const defaultTitle = defaultPageTitles[location.pathname];
+    const defaultTitle = resolveDefaultTitle(location.pathname);
     if (defaultTitle) {
       setTitle(defaultTitle);
       setBackButton(false);
@@ -55,7 +74,7 @@ export function AppLayout() {
   }, [location.pathname, setTitle, setBackButton]);
 
   return (
-    <div className="flex h-screen bg-[#F5F7FA] font-sans overflow-hidden" dir="rtl">
+    <div className="flex h-screen bg-[#f8fafc] font-sans overflow-hidden" dir="rtl">
       {/* Mobile Sidebar Backdrop */}
       {isOpen && (
         <div 

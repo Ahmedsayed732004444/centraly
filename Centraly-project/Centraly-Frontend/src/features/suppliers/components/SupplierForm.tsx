@@ -21,6 +21,7 @@ export function SupplierForm({ initialData, onSubmit }: SupplierFormProps) {
     formState: { errors },
   } = useForm<SupplierFormValues>({
     resolver: zodResolver(createSupplierSchema),
+    mode: 'onBlur',
     defaultValues: {
       name: initialData?.name || '',
       type: initialData?.type || '',

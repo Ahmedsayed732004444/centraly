@@ -1,3 +1,5 @@
+import { BaseFilters } from '@/shared/types/pagination';
+
 export enum SaleType {
   Wholesale = 1,
   Retail = 2,
@@ -6,6 +8,13 @@ export enum SaleType {
 export enum PaymentMethod {
   Cash = 1,
   Deferred = 2, // Credit/آجل
+}
+
+export interface SalesInvoiceFilters extends BaseFilters {
+  startDate?: string;
+  endDate?: string;
+  saleType?: SaleType;
+  paymentMethod?: PaymentMethod;
 }
 
 export interface CreateSalesInvoiceItemRequest {

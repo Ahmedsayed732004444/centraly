@@ -52,11 +52,13 @@ export function CategoriesPage() {
   // Forms
   const depForm = useForm({
     resolver: zodResolver(createDepartmentSchema),
+    mode: 'onBlur',
     defaultValues: { name: '' }
   });
 
   const catForm = useForm({
     resolver: zodResolver(createCategorySchema),
+    mode: 'onBlur',
     defaultValues: { name: '', departmentId: '' }
   });
 

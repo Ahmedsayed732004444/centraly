@@ -13,6 +13,10 @@ import { CustomerSummaryCard } from '../components/CustomerSummaryCard';
 import { getCustomerStatementColumns } from '../components/CustomerStatementColumns';
 import { CustomerPaymentForm } from '../components/CustomerPaymentForm';
 import { CustomerPaymentDrawerFooter } from '../components/CustomerPaymentDrawerFooter';
+import { ExportExcelButton } from '@/shared/components/ui/ExportExcelButton';
+import { exportToExcel } from '@/shared/utils/exportToExcel';
+import { CustomerStatementResponse } from '../schemas/contactSchemas';
+import { formatDateTime } from '@/shared/utils/date';
 export function CustomerDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const { setTitle, setBackButton } = useHeaderStore();
@@ -91,19 +95,39 @@ export function CustomerDetailsPage() {
             <ReceiptText className="text-gray-500" />
             حركة الحساب (كشف الحساب)
           </h3>
-          <select
-            value={filterType}
-            onChange={(e) => {
-              setFilterType(e.target.value);
-              setPageIndex(1);
-            }}
-            className={tokens.select + ' w-full sm:w-auto'}
-          >
-            <option value="الكل">جميع العمليات</option>
-            <option value="فاتورة">فاتورة مبيعات</option>
-            <option value="مرتجع">مرتجع مبيعات</option>
-            <option value="سداد مديونية">سداد مديونية</option>
-          </select>
+          <div className="flex items-center gap-3 flex-wrap w-full sm:w-auto">
+            <select
+              value={filterType}
+              onChange={(e) => {
+                setFilterType(e.target.value);
+                setPageIndex(1);
+              }}
+              className={tokens.select + ' w-full sm:w-auto'}
+            >
+              <option value="الكل">جميع العمليات</option>
+              <option value="فاتورة">فاتورة مبيعات</option>
+              <option value="مرتجع">مرتجع مبيعات</option>
+              <option value="سداد مديونية">سداد مديونية</option>
+            </select>
+            <ExportExcelButton
+              onExport={async () => {
+                await exportToExcel<CustomerStatementResponse>({
+                  fileName: `كشف-حساب-${customer.name}`,
+                  sheetName: 'كشف الحساب',
+                  title: `كشف حساب العميل: ${customer.name}`,
+                  columns: [
+                    { header: 'التاريخ', value: (r) => formatDateTime(r.date) },
+                    { header: 'نوع العملية', value: (r) => r.transactionType },
+                    { header: 'مدين (عليه)', value: (r) => (r.debit > 0 ? r.debit : ''), money: true },
+                    { header: 'دائن (له)', value: (r) => (r.credit > 0 ? r.credit : ''), money: true },
+                    { header: 'الرصيد بعد العملية', value: (r) => r.balanceAfter, money: true },
+                    { header: 'البيان', value: (r) => r.notes || '-', width: 30, align: 'right' },
+                  ],
+                  rows: statementArray,
+                });
+              }}
+            />
+          </div>
         </div>
         <div className="p-3 sm:p-5">
           <DataTable

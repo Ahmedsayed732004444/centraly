@@ -9,6 +9,12 @@ import { MaintenanceSuccessModal } from '../components/MaintenanceSuccessModal';
 import { MaintenanceResponse } from '../schemas/maintenanceSchemas';
 import { MAINTENANCE_STATUS_LABELS } from '@/shared/utils/enumLabels';
 import { Wrench, Plus, Search } from 'lucide-react';
+import { ExportExcelButton } from '@/shared/components/ui/ExportExcelButton';
+import { exportToExcel } from '@/shared/utils/exportToExcel';
+import { fetchAllPages } from '@/shared/utils/fetchAllPages';
+import { maintenanceApi } from '../api/MaintenanceApi';
+import { MaintenanceSummary } from '../schemas/maintenanceSchemas';
+import { formatDateTime } from '@/shared/utils/date';
 export function MaintenancePage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [searchValue, setSearchValue] = useState<string>('');
@@ -59,13 +65,40 @@ export function MaintenancePage() {
           <Wrench className="w-5 h-5 text-blue-600 shrink-0" />
           <span className="text-sm font-medium whitespace-nowrap">{totalCount} تذكرة صيانة</span>
         </div>
-        <button
-          onClick={() => setIsCreateOpen(true)}
-          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors w-full sm:w-auto shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          تذكرة جديدة
-        </button>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <ExportExcelButton
+            onExport={async () => {
+              const rows = await fetchAllPages<MaintenanceSummary>((pageNumber) =>
+                maintenanceApi.getAll({ pageNumber, pageSize: 50, status: statusFilter || undefined, searchValue: debouncedSearch || undefined })
+              );
+              await exportToExcel<MaintenanceSummary>({
+                fileName: 'تذاكر-الصيانة',
+                sheetName: 'الصيانة',
+                title: 'سجل تذاكر الصيانة',
+                columns: [
+                  { header: 'العميل', value: (r) => r.customerName },
+                  { header: 'الهاتف', value: (r) => r.customerPhone || '-' },
+                  { header: 'الجهاز', value: (r) => r.deviceDescription || '-' },
+                  { header: 'المشكلة', value: (r) => r.problem || '-', width: 30, align: 'right' },
+                  { header: 'الحالة', value: (r) => MAINTENANCE_STATUS_LABELS[r.status] || r.status },
+                  { header: 'الإجمالي', value: (r) => r.totalPrice, money: true },
+                  { header: 'المدفوع', value: (r) => r.paidAmount, money: true },
+                  { header: 'المتبقي', value: (r) => r.remainingAmount, money: true },
+                  { header: 'موعد التسليم', value: (r) => (r.deliveryDate ? formatDateTime(r.deliveryDate) : '-') },
+                  { header: 'تاريخ الإنشاء', value: (r) => formatDateTime(r.createdAt) },
+                ],
+                rows,
+              });
+            }}
+          />
+          <button
+            onClick={() => setIsCreateOpen(true)}
+            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors w-full sm:w-auto shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            تذكرة جديدة
+          </button>
+        </div>
       </div>
       {/* Filters & Search */}
       <div className="flex flex-col sm:flex-row gap-4 mb-4 justify-between">

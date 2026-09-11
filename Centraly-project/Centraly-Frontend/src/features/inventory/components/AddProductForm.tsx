@@ -23,6 +23,7 @@ export function AddProductForm({ onSubmit, initialData, isSubmitting: _ }: AddPr
     formState: { errors },
   } = useForm({
     resolver: zodResolver(createProductSchema),
+    mode: 'onBlur',
     defaultValues: initialData ? {
       name: initialData.name,
       barcode: initialData.barcode || '',

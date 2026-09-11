@@ -1,12 +1,17 @@
-import { toUtcStartOfDayISOString, toUtcEndOfDayISOString } from '@/shared/utils/date';
-﻿import { useState } from 'react';
+import { useState } from 'react';
+import { toUtcStartOfDayISOString, toUtcEndOfDayISOString, formatDateOnly } from '@/shared/utils/date';
 import { useSalesReturns } from '../hooks/useSales';
 import { DataTable } from '@/shared/components/ui/DataTable';
 import { Plus } from 'lucide-react';
 import { useDebounce } from '@/shared/hooks/useDebounce';
 import { useNavigate } from 'react-router-dom';
-import { getSalesReturnsColumns } from '../components/SalesReturnsColumns';
+import { getSalesReturnsColumns, getReasonLabel } from '../components/SalesReturnsColumns';
 import { SalesReturnsFilters } from '../components/SalesReturnsFilters';
+import { ExportExcelButton } from '@/shared/components/ui/ExportExcelButton';
+import { exportToExcel } from '@/shared/utils/exportToExcel';
+import { fetchAllPages } from '@/shared/utils/fetchAllPages';
+import { salesRepository } from '../api/salesApi';
+import { SalesReturnResponse } from '../schemas/salesSchemas';
 export const SalesReturnsPage = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -40,6 +45,34 @@ export const SalesReturnsPage = () => {
           dateFilter={dateFilter}
           onDateChange={setDateFilter}
         />
+        <div className="flex justify-end mb-3">
+          <ExportExcelButton
+            onExport={async () => {
+              const rows = await fetchAllPages<SalesReturnResponse>((pageNumber) =>
+                salesRepository.getReturns({
+                  pageNumber,
+                  pageSize: 50,
+                  searchValue: debouncedSearch,
+                  startDate: dateFilter ? toUtcStartOfDayISOString(dateFilter) : undefined,
+                  endDate: dateFilter ? toUtcEndOfDayISOString(dateFilter) : undefined,
+                })
+              );
+              await exportToExcel<SalesReturnResponse>({
+                fileName: 'مرتجعات-المبيعات',
+                sheetName: 'مرتجعات المبيعات',
+                title: 'سجل مرتجعات المبيعات',
+                columns: [
+                  { header: 'تاريخ المرتجع', value: (r) => formatDateOnly(r.returnDate) },
+                  { header: 'رقم الفاتورة الأصلية', value: (r) => r.invoiceNumber || '-' },
+                  { header: 'السبب', value: (r) => getReasonLabel(r.reason) },
+                  { header: 'طريقة الاسترداد', value: (r) => (r.isCashRefund ? 'نقدي' : 'خصم من المديونية') },
+                  { header: 'إجمالي المرتجع', value: (r) => r.totalReturnedAmount, money: true },
+                ],
+                rows,
+              });
+            }}
+          />
+        </div>
         <div className="overflow-x-auto">
         <DataTable
           data={filteredData}
@@ -51,6 +84,7 @@ export const SalesReturnsPage = () => {
           totalPages={data?.totalPages || 1}
           onNextPage={() => setPage(p => Math.min(p + 1, data?.totalPages || 1))}
           onPrevPage={() => setPage(p => Math.max(p - 1, 1))}
+          emptyEntity="مرتجعات مبيعات"
         />
         </div>
       </div>

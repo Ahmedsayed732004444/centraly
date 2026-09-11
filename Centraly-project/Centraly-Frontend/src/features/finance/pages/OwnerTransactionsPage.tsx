@@ -6,6 +6,10 @@ import { DataTable } from '@/shared/components/ui/DataTable';
 import { getOwnerTransactionsColumns } from '../components/OwnerTransactionsColumns';
 import { OwnerTransactionsHeader } from '../components/OwnerTransactionsHeader';
 import { OwnerTransactionForm } from '../components/OwnerTransactionForm';
+import { ExportExcelButton } from '@/shared/components/ui/ExportExcelButton';
+import { exportToExcel } from '@/shared/utils/exportToExcel';
+import { ownerTxDirection } from '@/shared/utils/moneyDirection';
+import { OwnerTransactionResponse } from '../schemas/financeSchemas';
 
 export function OwnerTransactionsPage() {
   const { data: transactions, isLoading } = useOwnerTransactions();
@@ -62,7 +66,27 @@ export function OwnerTransactionsPage() {
       />
 
       <div>
-        <h3 className="text-lg font-bold text-gray-800 mb-4">سجل المعاملات</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-800">سجل المعاملات</h3>
+          <ExportExcelButton
+            onExport={async () => {
+              const rows = Array.isArray(transactions) ? transactions : [];
+              await exportToExcel<OwnerTransactionResponse>({
+                fileName: 'معاملات-المالك',
+                sheetName: 'معاملات المالك',
+                title: 'سجل معاملات المالك',
+                columns: [
+                  { header: 'النوع', value: (r) => (ownerTxDirection(r.category) === 'in' ? 'إيداع رأس مال' : 'سحب أرباح') },
+                  { header: 'المبلغ', value: (r) => r.amount, money: true },
+                  { header: 'المصدر', value: (r) => (r.paymentSource === 1 ? 'الدرج' : 'الخزينة') },
+                  { header: 'التاريخ', value: (r) => new Date(r.createdAt).toLocaleString('ar-EG-u-nu-latn') },
+                  { header: 'ملاحظات', value: (r) => r.notes || '-', width: 30, align: 'right' },
+                ],
+                rows,
+              });
+            }}
+          />
+        </div>
         <DataTable
           columns={columns}
           data={Array.isArray(transactions) ? transactions : ((transactions as any)?.items || [])}
@@ -72,6 +96,7 @@ export function OwnerTransactionsPage() {
           pageSize={transactions?.length || 50}
           onNextPage={() => {}}
           onPrevPage={() => {}}
+          emptyEntity="معاملات مالك"
         />
       </div>
 

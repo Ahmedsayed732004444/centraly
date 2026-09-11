@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/axios";
-import { CreateSalesInvoiceRequest, SalesInvoiceResponse, CreateSalesReturnRequest, SalesReturnResponse } from "../schemas/salesSchemas";
+import { CreateSalesInvoiceRequest, SalesInvoiceResponse, CreateSalesReturnRequest, SalesReturnResponse, SalesInvoiceFilters } from "../schemas/salesSchemas";
 import { PaginatedList } from "@/shared/types/pagination";
 
 export const salesRepository = {
@@ -13,7 +13,7 @@ export const salesRepository = {
     return response.data;
   },
 
-  getInvoices: async (filters: { pageNumber?: number; pageSize?: number; searchValue?: string }): Promise<PaginatedList<SalesInvoiceResponse>> => {
+  getInvoices: async (filters: SalesInvoiceFilters): Promise<PaginatedList<SalesInvoiceResponse>> => {
     const response = await apiClient.get<PaginatedList<SalesInvoiceResponse>>('/sales-invoices', { params: filters });
     return response.data;
   },
@@ -28,7 +28,7 @@ export const salesRepository = {
     return response.data;
   },
 
-  getReturns: async (filters: { pageNumber?: number; pageSize?: number; searchValue?: string }): Promise<PaginatedList<SalesReturnResponse>> => {
+  getReturns: async (filters: { pageNumber?: number; pageSize?: number; searchValue?: string; startDate?: string; endDate?: string }): Promise<PaginatedList<SalesReturnResponse>> => {
     const response = await apiClient.get<PaginatedList<SalesReturnResponse>>('/sales-returns', { params: filters });
     return response.data;
   }

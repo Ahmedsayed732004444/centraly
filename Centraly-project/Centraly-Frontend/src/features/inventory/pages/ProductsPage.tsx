@@ -10,6 +10,12 @@ import { ProductsTable } from '@/features/inventory/components/ProductsTable';
 import { AddProductForm } from '@/features/inventory/components/AddProductForm';
 import { tokens } from '@/shared/styles/tokens';
 import { ProductResponse } from '@/features/inventory/schemas/inventorySchemas';
+import { ExportExcelButton } from '@/shared/components/ui/ExportExcelButton';
+import { exportToExcel } from '@/shared/utils/exportToExcel';
+import { fetchAllPages } from '@/shared/utils/fetchAllPages';
+import { inventoryRepository } from '@/features/inventory/api/InventoryApi';
+
+const USAGE_LABELS: Record<number, string> = { 1: 'بيع فقط', 2: 'صيانة فقط', 3: 'بيع وصيانة' };
 
 /**
  * ProductsPage – composes feature components only.
@@ -140,6 +146,40 @@ export function ProductsPage() {
         onUsageChange={handleUsageChange}
         onAddClick={() => setIsDrawerOpen(true)}
       />
+
+      <div className="flex justify-end">
+        <ExportExcelButton
+          onExport={async () => {
+            const rows = await fetchAllPages<ProductResponse>((pageNumber) =>
+              inventoryRepository.getProducts({
+                pageNumber,
+                pageSize: 50,
+                searchValue: searchTerm || undefined,
+                departmentId: departmentFilter || undefined,
+                categoryId: categoryFilter || undefined,
+                stockStatus: stockFilter || undefined,
+                usage: usageFilter ? Number(usageFilter) : undefined,
+              })
+            );
+            await exportToExcel<ProductResponse>({
+              fileName: 'المنتجات',
+              sheetName: 'المنتجات',
+              title: 'سجل المنتجات',
+              columns: [
+                { header: 'اسم المنتج', value: (r) => r.name || '-' },
+                { header: 'الباركود', value: (r) => r.barcode || '-' },
+                { header: 'القسم الرئيسي', value: (r) => r.department?.name || '-' },
+                { header: 'القسم الفرعي', value: (r) => r.category?.name || '-' },
+                { header: 'النوع', value: (r) => USAGE_LABELS[r.usage] || '-' },
+                { header: 'الكمية', value: (r) => r.totalQuantity },
+                { header: 'موقع التخزين', value: (r) => r.storageLocation || '-' },
+                { header: 'حالة المخزون', value: (r) => (r.isOutOfStock ? 'نفد المخزون' : r.isLowStock ? 'مخزون منخفض' : 'متوفر') },
+              ],
+              rows,
+            });
+          }}
+        />
+      </div>
 
       {/* Data table */}
       <ProductsTable

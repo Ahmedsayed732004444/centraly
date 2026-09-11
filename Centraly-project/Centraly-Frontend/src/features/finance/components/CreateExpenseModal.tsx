@@ -20,6 +20,7 @@ export function CreateExpenseModal({ isOpen, onClose }: CreateExpenseModalProps)
     formState: { errors },
   } = useForm<CreateExpenseRequest>({
     resolver: zodResolver(createExpenseSchema),
+    mode: 'onBlur',
     defaultValues: { categoryId: '', amount: 0, paymentSource: undefined, notes: '' }
   });
   const onSubmit = async (data: CreateExpenseRequest) => {

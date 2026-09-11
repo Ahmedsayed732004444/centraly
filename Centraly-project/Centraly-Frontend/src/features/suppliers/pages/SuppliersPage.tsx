@@ -11,6 +11,11 @@ import * as z from 'zod';
 import { createSupplierSchema } from '../schemas/supplierSchemas';
 import { useNavigate } from 'react-router-dom';
 import { SupplierPaymentModal } from '../components/SupplierPaymentModal';
+import { ExportExcelButton } from '@/shared/components/ui/ExportExcelButton';
+import { exportToExcel } from '@/shared/utils/exportToExcel';
+import { fetchAllPages } from '@/shared/utils/fetchAllPages';
+import { supplierRepository } from '../api/SupplierApi';
+import { formatDateOnly } from '@/shared/utils/date';
 
 export function SuppliersPage() {
   const navigate = useNavigate();
@@ -109,6 +114,30 @@ export function SuppliersPage() {
         onSearchChange={handleSearchChange}
         onAddClick={openAddDrawer}
       />
+
+      <div className="flex justify-end">
+        <ExportExcelButton
+          onExport={async () => {
+            const rows = await fetchAllPages<SupplierResponse>((pageNumber) =>
+              supplierRepository.getSuppliers({ pageNumber, pageSize: 50, searchValue: searchTerm || undefined })
+            );
+            await exportToExcel<SupplierResponse>({
+              fileName: 'الموردين',
+              sheetName: 'الموردين',
+              title: 'سجل الموردين',
+              columns: [
+                { header: 'اسم المورد', value: (r) => r.name },
+                { header: 'الهاتف', value: (r) => r.phone || '-' },
+                { header: 'الرصيد المستحق', value: (r) => r.debtBalance, money: true },
+                { header: 'عدد الفواتير', value: (r) => r.purchaseInvoicesCount },
+                { header: 'عدد المرتجعات', value: (r) => r.returnsCount },
+                { header: 'تاريخ الإضافة', value: (r) => formatDateOnly(r.createdAt) },
+              ],
+              rows,
+            });
+          }}
+        />
+      </div>
 
       {/* Data table */}
       <SuppliersTable

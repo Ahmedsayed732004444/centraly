@@ -1,7 +1,8 @@
 import { resolveProductImageUrl } from '../utils/posUtils';
-import { Trash2, Plus, Minus, Undo2, CreditCard, Wallet, Package } from 'lucide-react';
+import { Trash2, Plus, Minus, Undo2, CreditCard, Wallet } from 'lucide-react';
 import { PaymentMethod } from '../schemas/salesSchemas';
 import { CartItem } from '../utils/cartLogic';
+import { Avatar } from '@/shared/components/ui/Avatar';
 export type { CartItem };
 function fmt(value: number): string {
   return new Intl.NumberFormat('en-EG', {
@@ -60,7 +61,7 @@ export function PosCart({ items, onUpdateQuantity, onRemoveItem, onClearCart, on
                   {imageSrc ? (
                     <img src={imageSrc} alt={item.productName} className="max-h-full max-w-full object-contain mix-blend-multiply" />
                   ) : (
-                    <Package size={24} className="text-gray-300" />
+                    <Avatar name={item.productName} size="md" />
                   )}
                 </div>
                 {}

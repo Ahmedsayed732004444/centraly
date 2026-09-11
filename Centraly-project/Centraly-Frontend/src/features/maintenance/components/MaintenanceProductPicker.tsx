@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react';
 import { Column } from '@/shared/components/ui/DataTable';
 import { PickerModal } from '@/shared/components/ui/PickerModal';
 import { useProducts } from '@/features/inventory/hooks/useInventory';
-import { ProductResponse, isMaintenanceProduct } from '@/features/inventory/schemas/inventorySchemas';
+import { ProductResponse, isMaintenanceProduct, getMaintenancePrice } from '@/features/inventory/schemas/inventorySchemas';
+import { formatNumber } from '@/shared/utils/currency';
 
 interface Props {
   isOpen: boolean;
@@ -116,8 +117,8 @@ export function MaintenanceProductPicker({ isOpen, onClose, onAdd, excludeProduc
     {
       header: 'سعر الصيانة',
       cell: (row) => {
-        const price = row.batches?.[0]?.maintenancePrice || 0;
-        return <span className="font-semibold text-emerald-600">{price.toLocaleString('ar-EG')} ج.م</span>;
+        const price = getMaintenancePrice(row);
+        return <span className="font-semibold text-emerald-600">{formatNumber(price)} ج.م</span>;
       },
     },
   ];

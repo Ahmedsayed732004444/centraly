@@ -1,6 +1,8 @@
 import { ArrowDownLeft, ArrowUpRight, Calendar, ReceiptText } from 'lucide-react';
 import { formatCurrency } from '@/shared/utils/currency';
+import { formatDateTime } from '@/shared/utils/date';
 import { CustomerStatementResponse } from '../schemas/contactSchemas';
+import { Badge } from '@/shared/components/ui/Badge';
 
 export const getCustomerStatementColumns = () => [
   {
@@ -8,13 +10,7 @@ export const getCustomerStatementColumns = () => [
     cell: (row: CustomerStatementResponse) => (
       <div className="flex items-center gap-2 text-gray-600">
         <Calendar size={16} />
-        {new Date(row.date).toLocaleDateString('ar-EG', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        })}
+        {formatDateTime(row.date)}
       </div>
     ),
   },
@@ -24,17 +20,16 @@ export const getCustomerStatementColumns = () => [
       const isInvoice = row.transactionType.includes('Invoice') || row.transactionType === 'فاتورة';
       const isPayment = row.transactionType.includes('Payment') || row.transactionType === 'دفعة';
       const isReturn = row.transactionType.includes('Return') || row.transactionType === 'مرتجع';
-      
+
       if (isInvoice) return (
-        <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1 cursor-pointer hover:bg-orange-200 transition-colors">
+        <Badge variant="warning" icon={<ReceiptText size={12} className="opacity-70" />}>
           فاتورة مبيعات
-          <ReceiptText size={12} className="opacity-70" />
-        </span>
+        </Badge>
       );
-      if (isPayment) return <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold">سداد مديونية</span>;
-      if (isReturn) return <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-bold">مرتجع مبيعات</span>;
-      
-      return <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-xs font-bold">{row.transactionType}</span>;
+      if (isPayment) return <Badge variant="success">سداد مديونية</Badge>;
+      if (isReturn) return <Badge variant="danger">مرتجع مبيعات</Badge>;
+
+      return <Badge variant="neutral">{row.transactionType}</Badge>;
     },
   },
   {
@@ -64,7 +59,7 @@ export const getCustomerStatementColumns = () => [
   {
     header: 'الرصيد بعد العملية',
     cell: (row: CustomerStatementResponse) => {
-      if (row.balanceAfter === 0) return <span className="text-gray-500 font-bold">0 ج.م</span>;
+      if (row.balanceAfter === 0) return <span className="text-gray-500 font-bold" dir="ltr">{formatCurrency(0)}</span>;
       if (row.balanceAfter > 0) return <span className="text-red-600 font-bold" dir="ltr">{formatCurrency(row.balanceAfter)}</span>;
       return <span className="text-green-600 font-bold" dir="ltr">{formatCurrency(Math.abs(row.balanceAfter))} (مقدم)</span>;
     },

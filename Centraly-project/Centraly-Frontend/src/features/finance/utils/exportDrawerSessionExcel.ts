@@ -6,6 +6,7 @@
 import ExcelJS from 'exceljs/dist/exceljs.min.js';
 import { DrawerSessionResponse, DrawerTransactionResponse } from '../schemas/financeSchemas';
 import { formatDate } from '@/shared/utils/date';
+import { formatDrawerNotes } from './formatDrawerNotes';
 
 const CATEGORY_LABELS: Record<number, string> = {
   1: 'مبيعات',
@@ -21,33 +22,6 @@ const CATEGORY_LABELS: Record<number, string> = {
 
 function getCategoryLabel(category: number): string {
   return CATEGORY_LABELS[category] ?? 'عمليات أخرى';
-}
-
-function formatNotes(notes?: string, source?: string): string {
-  const text = (notes || source || '').trim();
-  if (!text) return 'حركة نقدية بالدرج';
-
-  const lower = text.toLowerCase();
-  if (lower.includes('sales invoice') || lower.includes('salesinvoice')) {
-    const parts = text.split(/[\s-]+/);
-    const id = parts[parts.length - 1] || '';
-    return 'فاتورة مبيعات (' + id.slice(-6).toUpperCase() + ')';
-  }
-  if (lower.includes('purchase invoice') || lower.includes('purchaseinvoice')) {
-    const parts = text.split(/[\s-]+/);
-    const id = parts[parts.length - 1] || '';
-    return 'فاتورة مشتريات (' + id.slice(-6).toUpperCase() + ')';
-  }
-  if (lower.includes('maintenance')) {
-    return 'خدمة / تذكرة صيانة';
-  }
-  if (lower.includes('customer payment') || lower.includes('customer transaction')) {
-    return 'تحصيل دفعة من حساب عميل';
-  }
-  if (lower.includes('supplier payment')) {
-    return 'سداد دفعة لحساب مورد';
-  }
-  return text;
 }
 
 // لوحة الألوان الهادئة الاحترافية (Tailwind Slate / Emerald / Rose / Indigo)
@@ -460,7 +434,7 @@ export async function exportDrawerSessionToExcel(session: DrawerSessionResponse)
     balCell.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: PALETTE.textDark } };
 
     const notesCell = sheet.getCell(curRow, 7);
-    notesCell.value = formatNotes(tx.notes, tx.source);
+    notesCell.value = formatDrawerNotes(tx.notes, tx.source);
     notesCell.font = { name: 'Segoe UI', size: 9.5, color: { argb: PALETTE.textDark } };
 
     [1, 2, 4, 6, 7].forEach((col) => {

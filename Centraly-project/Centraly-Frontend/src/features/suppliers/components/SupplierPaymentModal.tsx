@@ -24,6 +24,7 @@ export function SupplierPaymentModal({ isOpen, onClose, supplier }: SupplierPaym
     formState: { errors },
   } = useForm<any>({
     resolver: zodResolver(createSupplierPaymentSchema),
+    mode: 'onBlur',
     defaultValues: {
       supplierId: supplier.supplierId,
       amount: Math.abs(supplier.debtBalance) > 0 ? Math.abs(supplier.debtBalance) : 0,

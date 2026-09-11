@@ -19,6 +19,7 @@ export function ManualTransactionModal({ isOpen, onClose }: ManualTransactionMod
     formState: { errors },
   } = useForm<AddManualTransactionRequest>({
     resolver: zodResolver(addManualTransactionSchema),
+    mode: 'onBlur',
     defaultValues: { type: 1, category: 3, amount: 0, notes: '', source: '' }
   });
   const transactionType = watch('type');

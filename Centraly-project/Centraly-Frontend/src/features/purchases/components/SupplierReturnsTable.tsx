@@ -1,6 +1,7 @@
 import { DataTable } from '@/shared/components/ui/DataTable';
 import { SupplierReturnResponse, RETURN_REASON_LABELS, RETURN_REASON_COLORS } from '../schemas/supplierReturnSchemas';
 import { formatCurrency } from '@/shared/utils/currency';
+import { formatDateTime } from '@/shared/utils/date';
 
 interface SupplierReturnsTableProps {
   data: SupplierReturnResponse[];
@@ -18,7 +19,7 @@ export function SupplierReturnsTable(props: SupplierReturnsTableProps) {
   const columns = [
     {
       header: 'التاريخ',
-      cell: (row: SupplierReturnResponse) => new Intl.DateTimeFormat('ar-EG', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(row.returnDate)),
+      cell: (row: SupplierReturnResponse) => formatDateTime(row.returnDate),
     },
     {
       header: 'المورد',
@@ -34,15 +35,15 @@ export function SupplierReturnsTable(props: SupplierReturnsTableProps) {
     },
     {
       header: 'عدد الأصناف',
-      cell: (row: SupplierReturnResponse) => (row as any).itemsCount ?? row.items?.length ?? 0,
+      cell: (row: SupplierReturnResponse) => row.itemsCount,
     },
     {
       header: 'إجمالي المرتجع',
       cell: (row: SupplierReturnResponse) => (
-        <span className="font-bold text-gray-900">{formatCurrency(row.totalReturnedAmount)}</span>
+        <span className="font-semibold text-gray-900">{formatCurrency(row.totalReturnedAmount)}</span>
       ),
     },
   ];
 
-  return <DataTable columns={columns} {...props} />;
+  return <DataTable columns={columns} emptyEntity="مرتجعات موردين" {...props} />;
 }

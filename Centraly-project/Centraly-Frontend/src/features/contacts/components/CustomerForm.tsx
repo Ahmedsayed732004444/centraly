@@ -17,6 +17,7 @@ export function CustomerForm({ initialData, onSubmit }: CustomerFormProps) {
     formState: { errors },
   } = useForm<CreateCustomerRequest>({
     resolver: zodResolver(createCustomerSchema),
+    mode: 'onBlur',
     defaultValues: {
       name: '',
       phone: '',
@@ -46,6 +47,7 @@ export function CustomerForm({ initialData, onSubmit }: CustomerFormProps) {
           {...register('name')}
           className={tokens.input}
           placeholder="مثال: أحمد محمد"
+          autoFocus
         />
         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
       </div>

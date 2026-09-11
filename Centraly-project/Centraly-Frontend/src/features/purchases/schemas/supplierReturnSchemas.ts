@@ -45,6 +45,7 @@ export interface SupplierReturnResponse {
   totalReturnedAmount: number;
   returnDate: string;
   items: SupplierReturnItemResponse[];
+  itemsCount: number;
 }
 
 // Request schema

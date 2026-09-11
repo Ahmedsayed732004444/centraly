@@ -1,12 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { salesRepository } from "../api/salesApi";
-import { CreateSalesInvoiceRequest, CreateSalesReturnRequest } from "../schemas/salesSchemas";
+import { CreateSalesInvoiceRequest, CreateSalesReturnRequest, SalesInvoiceFilters } from "../schemas/salesSchemas";
 import { toast } from "sonner";
 import { getApiErrorMessage } from "@/shared/utils/apiError";
-import { BaseFilters } from "@/shared/types/pagination";
 
 export const SALES_KEYS = {
-  invoices: (filters: BaseFilters) => ["sales-invoices", filters] as const,
+  invoices: (filters: SalesInvoiceFilters) => ["sales-invoices", filters] as const,
   invoiceDetails: (id: string) => ["sales-invoices", id] as const,
 };
 
@@ -25,7 +24,7 @@ export function useCreateSalesInvoice() {
   });
 }
 
-export function useSalesInvoices(filters: { pageNumber: number; pageSize: number; searchValue?: string }) {
+export function useSalesInvoices(filters: SalesInvoiceFilters) {
   return useQuery({
     queryKey: SALES_KEYS.invoices(filters),
     queryFn: () => salesRepository.getInvoices(filters),

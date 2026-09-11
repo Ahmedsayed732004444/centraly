@@ -1,5 +1,6 @@
-import { Edit, Package } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import { ProductResponse } from '@/features/inventory/schemas/inventorySchemas';
+import { Avatar } from '@/shared/components/ui/Avatar';
 
 interface ProductDetailsHeaderProps {
   product: ProductResponse;
@@ -21,8 +22,8 @@ export function ProductDetailsHeader({ product, onEditClick }: ProductDetailsHea
                 className="w-full h-32 object-contain rounded-xl"
               />
             ) : (
-              <div className="w-full h-32 bg-gray-50 flex items-center justify-center rounded-xl text-gray-300">
-                <Package size={48} strokeWidth={1.5} />
+              <div className="w-full h-32 bg-gray-50 flex items-center justify-center rounded-xl">
+                <Avatar name={product.name || '?'} size="xl" />
               </div>
             )}
             <div className="bg-gray-100 text-gray-600 font-mono text-[11px] font-bold px-2 py-1 rounded-lg w-full text-center border border-gray-200 truncate">

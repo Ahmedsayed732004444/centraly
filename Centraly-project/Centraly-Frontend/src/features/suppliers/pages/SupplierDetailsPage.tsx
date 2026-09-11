@@ -46,7 +46,7 @@ export function SupplierDetailsPage() {
         />
 
         {/* Statement / Transactions */}
-        <SupplierStatementCard statement={statement} isLoading={isLoadingStatement} />
+        <SupplierStatementCard statement={statement} isLoading={isLoadingStatement} supplierName={supplier.name} />
       </div>
 
       {isPaymentModalOpen && (

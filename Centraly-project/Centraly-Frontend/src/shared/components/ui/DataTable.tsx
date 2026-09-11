@@ -1,6 +1,8 @@
 import React from "react";
 import { Spinner } from "./Spinner";
 import { TablePagination } from "./TablePagination";
+import { EmptyState } from "./EmptyState";
+import { tokens } from "@/shared/styles/tokens";
 
 export interface Column<T> {
   header: string;
@@ -19,6 +21,8 @@ interface DataTableProps<T> {
   onNextPage: () => void;
   onPrevPage: () => void;
   onRowClick?: (row: T) => void;
+  /** Arabic noun phrase for the empty state, e.g. "فواتير مبيعات". Defaults to a generic message. */
+  emptyEntity?: string;
 }
 
 export function DataTable<T>({
@@ -32,24 +36,23 @@ export function DataTable<T>({
   onNextPage,
   onPrevPage,
   onRowClick,
+  emptyEntity,
 }: DataTableProps<T>) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div className={tokens.table.wrapper}>
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-right">
-          {/* thead — bg-gray-50, text-gray-600 */}
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className={tokens.table.head}>
             <tr>
               {columns.map((col, i) => (
-                <th key={i} className="px-6 py-3 font-semibold text-gray-600 text-sm whitespace-nowrap">
+                <th key={i} className={tokens.table.header}>
                   {col.header}
                 </th>
               ))}
             </tr>
           </thead>
 
-          {/* tbody — divide-y divide-gray-100, hover:bg-gray-50 */}
-          <tbody className="divide-y divide-gray-100">
+          <tbody className={tokens.table.body}>
             {isLoading ? (
               <tr>
                 <td colSpan={columns.length} className="px-6 py-10 text-center text-gray-400 text-sm">
@@ -61,19 +64,19 @@ export function DataTable<T>({
               </tr>
             ) : data.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-6 py-10 text-center text-gray-400 text-sm">
-                  لا توجد بيانات لعرضها
+                <td colSpan={columns.length}>
+                  <EmptyState entity={emptyEntity ?? "بيانات"} message={emptyEntity ? undefined : "لا توجد بيانات لعرضها"} />
                 </td>
               </tr>
             ) : (
               data.map((row, ri) => (
-                <tr 
-                  key={ri} 
-                  className={`transition-colors ${onRowClick ? 'hover:bg-gray-50 cursor-pointer' : 'hover:bg-gray-50'}`}
+                <tr
+                  key={ri}
+                  className={`${tokens.table.row} ${onRowClick ? 'cursor-pointer' : ''}`}
                   onClick={() => onRowClick?.(row)}
                 >
                   {columns.map((col, ci) => (
-                    <td key={ci} className="px-6 py-4">
+                    <td key={ci} className={tokens.table.cell}>
                       {col.cell
                         ? col.cell(row)
                         : (row[col.accessorKey as keyof T] as React.ReactNode)}

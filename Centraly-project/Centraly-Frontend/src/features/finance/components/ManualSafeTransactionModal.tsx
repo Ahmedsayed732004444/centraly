@@ -20,6 +20,7 @@ export function ManualSafeTransactionModal({ isOpen, onClose, safeId }: ManualSa
     formState: { errors },
   } = useForm<AddManualSafeTransactionRequest>({
     resolver: zodResolver(addManualSafeTransactionSchema),
+    mode: 'onBlur',
     defaultValues: { type: 1, category: 6, amount: 0, notes: '' }
   });
   const transactionType = watch('type');

@@ -28,17 +28,30 @@ export const tokens = {
   },
 
   // --- Table ---
+  // Reference look: white header (no filled band) with muted small-caps-weight text and
+  // a single hairline under it, hairline row dividers, a soft hover fade. Every table in
+  // the app - the shared DataTable and every hand-rolled <table> alike - should read off
+  // these instead of re-deriving its own header/row classes.
   table: {
-    header: "px-6 py-3 font-semibold text-[var(--color-text-main)] text-sm whitespace-nowrap",
-    cell:   "px-6 py-4",
+    wrapper: "bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden",
+    head:    "border-b border-gray-100",
+    header:  "px-6 py-3 font-semibold text-gray-500 text-xs whitespace-nowrap text-right",
+    body:    "divide-y divide-gray-100",
+    row:     "transition-colors hover:bg-gray-50/50",
+    cell:    "px-6 py-4",
   },
 
   // --- Badge ---
+  // Backing colors for shared/components/ui/Badge.tsx. Every list page's status/type
+  // pill should go through that component instead of hand-rolling Tailwind classes -
+  // a design review found 15 independent inline implementations before this existed.
   badge: {
     indigo: "bg-indigo-50 text-[var(--color-primary)] px-2.5 py-1 rounded-full text-xs font-medium",
+    purple: "bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full text-xs font-medium",
     success: "bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full text-xs font-medium",
     warning: "bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full text-xs font-medium",
     danger: "bg-red-50 text-red-600 px-2.5 py-1 rounded-full text-xs font-medium",
+    neutral: "bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full text-xs font-medium",
     // Bordered status chips (e.g. a ticket's Pending/Delivered/Returned header badge) -
     // a different look from the pill badges above, used where a stronger outline reads
     // better against a colored panel.

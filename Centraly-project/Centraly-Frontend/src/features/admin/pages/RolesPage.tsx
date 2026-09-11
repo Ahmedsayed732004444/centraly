@@ -3,6 +3,8 @@ import { useRoles, useToggleRoleStatus } from '../hooks/useRoles';
 import { RoleFormModal } from '../components/RoleFormModal';
 import { Button } from '@/shared/components/ui/Button';
 import { Plus, Edit, ToggleLeft, ToggleRight, ShieldAlert, CheckCircle2, XCircle } from 'lucide-react';
+import { Badge } from '@/shared/components/ui/Badge';
+import { EmptyState } from '@/shared/components/ui/EmptyState';
 export function RolesPage() {
   const [includeDisabled, setIncludeDisabled] = useState(false);
   const { data: roles, isLoading } = useRoles(includeDisabled);
@@ -53,14 +55,16 @@ export function RolesPage() {
             <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
             <p className="text-slate-500 font-medium">جاري التحميل...</p>
           </div>
+        ) : roles?.length === 0 ? (
+          <EmptyState entity="أدوار" />
         ) : (
           <div className="overflow-x-auto -webkit-overflow-scrolling-touch">
             <table className="w-full min-w-[560px] text-right border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-100">
-                  <th className="p-4 sm:p-5 px-5 sm:px-8 font-bold text-slate-600 text-sm tracking-wide">اسم الدور</th>
-                  <th className="p-4 sm:p-5 font-bold text-slate-600 text-sm tracking-wide">الحالة</th>
-                  <th className="p-4 sm:p-5 px-5 sm:px-8 font-bold text-slate-600 text-sm tracking-wide w-24 sm:w-40 text-center">الإجراءات</th>
+                <tr className="border-b border-slate-100">
+                  <th className="p-4 sm:p-5 px-5 sm:px-8 font-semibold text-slate-500 text-xs">اسم الدور</th>
+                  <th className="p-4 sm:p-5 font-semibold text-slate-500 text-xs">الحالة</th>
+                  <th className="p-4 sm:p-5 px-5 sm:px-8 font-semibold text-slate-500 text-xs w-24 sm:w-40 text-center">الإجراءات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -71,10 +75,9 @@ export function RolesPage() {
                       <p className="text-[13px] text-slate-400 mt-0.5 font-medium font-mono">ID: {role.id.slice(0, 8)}...</p>
                     </td>
                     <td className="p-4 sm:p-5">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-bold border whitespace-nowrap ${role.isDeleted ? 'bg-red-50 text-red-700 border-red-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100'}`}>
-                        {role.isDeleted ? <XCircle size={14} /> : <CheckCircle2 size={14} />}
+                      <Badge variant={role.isDeleted ? 'danger' : 'success'} icon={role.isDeleted ? <XCircle size={14} /> : <CheckCircle2 size={14} />}>
                         {role.isDeleted ? 'معطل' : 'نشط'}
-                      </span>
+                      </Badge>
                     </td>
                     <td className="p-4 sm:p-5 px-5 sm:px-8">
                       <div className="flex items-center justify-center gap-2">
@@ -92,13 +95,6 @@ export function RolesPage() {
                     </td>
                   </tr>
                 ))}
-                {roles?.length === 0 && (
-                  <tr>
-                    <td colSpan={3} className="p-16 text-center text-slate-500 font-medium text-lg">
-                      لا توجد أدوار مسجلة بعد.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>

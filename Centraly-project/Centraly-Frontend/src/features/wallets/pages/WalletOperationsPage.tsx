@@ -30,6 +30,7 @@ export function WalletOperationsPage() {
 
   const form = useForm<OperationForm>({
     resolver: zodResolver(operationSchema) as any,
+    mode: 'onBlur',
     defaultValues: {
       walletId: '',
       operationType: WalletOperationType.CashIn,

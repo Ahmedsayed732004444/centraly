@@ -1,6 +1,7 @@
 import { Building2 } from 'lucide-react';
 import { ProductResponse, ProductBatchResponse } from '@/features/inventory/schemas/inventorySchemas';
 import { formatCurrency } from '@/shared/utils/currency';
+import { formatDateOnly } from '@/shared/utils/date';
 import { BaseModal } from '@/shared/components/ui/BaseModal';
 interface BatchSelectionModalProps {
   isOpen: boolean;
@@ -11,6 +12,37 @@ interface BatchSelectionModalProps {
 export function BatchSelectionModal({ isOpen, onClose, product, onSelectBatch }: BatchSelectionModalProps) {
   if (!product) return null;
   const availableBatches = product.batches.filter((b) => b.availableQuantity > 0);
+
+  // With only one batch there's no "which company" decision left to make - just the
+  // price tier - so skip the batch-list chrome (supplier/date row) and use a smaller,
+  // faster-to-scan modal instead of the full multi-batch comparison view.
+  if (availableBatches.length === 1) {
+    const batch = availableBatches[0];
+    return (
+      <BaseModal isOpen={isOpen} onClose={onClose} title="اختر السعر" subtitle={product.name} size="md">
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            onClick={() => onSelectBatch(batch, batch.retailPrice)}
+            className="flex items-center justify-between p-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-colors"
+            autoFocus
+          >
+            <span className="font-bold">تجزئة</span>
+            <span className="font-bold text-lg">{formatCurrency(batch.retailPrice)}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onSelectBatch(batch, batch.wholesalePrice)}
+            className="flex items-center justify-between p-4 bg-white hover:bg-gray-50 border-2 border-[var(--color-border)] hover:border-emerald-600 text-[var(--color-text-main)] rounded-xl transition-colors"
+          >
+            <span className="font-bold text-[var(--color-text-muted)]">جملة</span>
+            <span className="font-bold text-lg">{formatCurrency(batch.wholesalePrice)}</span>
+          </button>
+        </div>
+      </BaseModal>
+    );
+  }
+
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} title="اختيار الشركة والسعر" subtitle={product.name} size="3xl">
       <div className="p-4 sm:p-6">
@@ -35,7 +67,7 @@ export function BatchSelectionModal({ isOpen, onClose, product, onSelectBatch }:
                       {batch.supplierName || 'بدون مورد'}
                     </h4>
                     <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                      تاريخ: {new Date(batch.dateReceived).toLocaleDateString('ar-EG')} • متاح {batch.availableQuantity}
+                      تاريخ: {formatDateOnly(batch.dateReceived)} • متاح {batch.availableQuantity}
                     </p>
                   </div>
                 </div>

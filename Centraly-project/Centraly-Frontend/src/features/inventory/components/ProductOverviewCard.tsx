@@ -1,5 +1,6 @@
 import { Info, Package, Archive, Hash, Calendar, CheckCircle2, Layers, Tag, BellRing } from 'lucide-react';
 import { ProductResponse } from '@/features/inventory/schemas/inventorySchemas';
+import { formatDateOnly, formatDateTime } from '@/shared/utils/date';
 
 interface ProductOverviewCardProps {
   product: ProductResponse;
@@ -46,7 +47,7 @@ export function ProductOverviewCard({ product }: ProductOverviewCardProps) {
             <InfoRow 
               icon={<Calendar size={18} />} 
               label="تاريخ الإنشاء" 
-              value={new Date(product.createdAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })} 
+              value={formatDateTime(product.createdAt)}
             />
             <InfoRow 
               icon={<CheckCircle2 size={18} className={isOutOfStock ? 'text-red-500' : 'text-emerald-500'} />} 
@@ -78,7 +79,7 @@ export function ProductOverviewCard({ product }: ProductOverviewCardProps) {
             <InfoRow 
               icon={<Calendar size={18} />} 
               label="تاريخ الإضافة" 
-              value={new Date(product.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })} 
+              value={formatDateOnly(product.createdAt)}
             />
             <InfoRow 
               icon={<CheckCircle2 size={18} className={isLowStock ? 'text-amber-500' : 'text-emerald-500'} />} 

@@ -13,6 +13,10 @@ import { toast } from 'sonner';
 import { MaintenanceProductPicker } from './MaintenanceProductPicker';
 import { MaintenanceResponse } from '../schemas/maintenanceSchemas';
 import { printMaintenanceIntakeReceipt, printMaintenanceDeliveryReceipt } from '../utils/maintenanceReceiptPrint';
+import { statusConfig } from './MaintenanceListTable';
+import { formatCurrency, formatNumber } from '@/shared/utils/currency';
+import { formatDateOnly } from '@/shared/utils/date';
+import { getMaintenancePrice } from '@/features/inventory/schemas/inventorySchemas';
 interface Props {
   id: string | null;
   onClose: () => void;
@@ -34,7 +38,8 @@ export function MaintenanceDetailDrawer({ id, onClose, onDelivered }: Props) {
     // z.coerce.number() makes the resolver's inferred input/output types diverge from
     // UpdateMaintenanceRequest in a way TS can't reconcile here - a known
     // zodResolver + z.coerce friction, not an oversight.
-    resolver: zodResolver(updateMaintenanceSchema) as any
+    resolver: zodResolver(updateMaintenanceSchema) as any,
+    mode: 'onBlur',
   });
   const { fields, append, remove } = useFieldArray({
     control,
@@ -71,6 +76,10 @@ export function MaintenanceDetailDrawer({ id, onClose, onDelivered }: Props) {
   const currentTotal = Number(watchServicePrice) + totalParts;
   const currentPaid = watch('paidAmount') || 0;
   const remaining = currentTotal - currentPaid;
+  // The deposit can exceed the current total while the final service price isn't set
+  // yet (servicePrice still 0) - that's a customer credit, not a debt, and must never
+  // render as a bare negative number.
+  const hasCredit = remaining < 0;
   const onSubmit = (data: UpdateMaintenanceRequest) => {
     if (!id) return;
     if (!data.deliveryDate) delete data.deliveryDate;
@@ -115,17 +124,13 @@ if (!id) return null;
         <form onSubmit={handleSubmit(onSubmit as any)} className="h-full flex flex-col">
           <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6">
             {}
-            <div className={`p-4 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 ${
-              ticket.status === 'Pending' ? tokens.badge.statusPending :
-              ticket.status === 'Delivered' ? tokens.badge.statusDelivered :
-              tokens.badge.statusReturned
-            }`}>
+            <div className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 ${statusConfig[ticket.status]?.color ?? 'bg-slate-100 text-slate-800 border-slate-200'}`}>
               <div>
                 <div className="font-bold text-lg">
-                  الحالة: {ticket.status === 'Pending' ? 'قيد الانتظار' : ticket.status === 'Delivered' ? 'تم التسليم' : 'مرتجع'}
+                  الحالة: {statusConfig[ticket.status]?.label ?? ticket.status}
                 </div>
                 <div className="text-sm opacity-80 mt-0.5">
-                  تاريخ الإنشاء: {new Date(ticket.createdAt).toLocaleDateString('ar-EG')}
+                  تاريخ الإنشاء: {formatDateOnly(ticket.createdAt)}
                 </div>
               </div>
 
@@ -228,14 +233,14 @@ if (!id) return null;
                         <div className="w-24 sm:w-32 bg-gray-50/50 border border-gray-100 rounded-lg p-2 text-center">
                           <label className="block text-xs font-medium text-gray-500 mb-0.5">سعر الصيانة</label>
                           <div className="font-bold text-emerald-600 text-sm">
-                            {watchProductsUsed[index]?.maintenancePrice?.toLocaleString('ar-EG')} ج.م
+                            {formatNumber(watchProductsUsed[index]?.maintenancePrice || 0)} ج.م
                           </div>
                           <input type="hidden" {...register(`productsUsed.${index}.maintenancePrice`)} />
                         </div>
                         <div className="w-24 sm:w-32 bg-gray-50 border border-gray-200 rounded-lg p-2 text-center">
                           <label className="block text-xs font-medium text-gray-500 mb-0.5">الإجمالي</label>
                           <div className="font-bold text-gray-800 text-sm">
-                            {((watchProductsUsed[index]?.quantity || 0) * (watchProductsUsed[index]?.maintenancePrice || 0)).toLocaleString('ar-EG')}
+                            {formatNumber((watchProductsUsed[index]?.quantity || 0) * (watchProductsUsed[index]?.maintenancePrice || 0))}
                           </div>
                         </div>
                         {ticket.status === 'Pending' && (
@@ -288,18 +293,30 @@ if (!id) return null;
                 <div className="space-y-3 mb-4">
                   <div className={`flex justify-between text-white font-bold ${tokens.darkSummaryPanel.divider} border-b pb-3`}>
                     <span>الإجمالي الكلي:</span>
-                    <span className="text-xl">{currentTotal.toLocaleString('ar-EG')} ج.م</span>
+                    <span className="text-xl">{formatNumber(currentTotal)} ج.م</span>
                   </div>
                   <div className={`flex justify-between ${tokens.darkSummaryPanel.accent} font-bold ${tokens.darkSummaryPanel.divider} border-b pb-3 pt-1`}>
                     <span>المدفوع (مقدم):</span>
-                    <span className="text-lg">{Number(currentPaid).toLocaleString('ar-EG')} ج.م</span>
+                    <span className="text-lg">{formatNumber(Number(currentPaid))} ج.م</span>
                   </div>
                 </div>
                 <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm mt-auto">
-                  <div className="text-blue-200 text-sm mb-1">المبلغ المتبقي للتحصيل عند التسليم</div>
-                  <div className={`text-3xl font-black ${remaining > 0 ? 'text-red-300' : 'text-green-300'}`}>
-                    {remaining.toLocaleString('ar-EG')} <span className="text-base font-normal opacity-80">ج.م</span>
-                  </div>
+                  {hasCredit ? (
+                    <>
+                      <div className="text-blue-200 text-sm mb-1">رصيد للعميل (المدفوع أكبر من الإجمالي الحالي)</div>
+                      <div className="text-3xl font-black text-amber-300">
+                        {formatNumber(Math.abs(remaining))} <span className="text-base font-normal opacity-80">ج.م</span>
+                      </div>
+                      <p className="text-blue-200/80 text-xs mt-2">لم يتم تحديد سعر الصيانة النهائي بعد - راجعه قبل التسليم</p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-blue-200 text-sm mb-1">المبلغ المتبقي للتحصيل عند التسليم</div>
+                      <div className={`text-3xl font-black ${remaining > 0 ? 'text-red-300' : 'text-green-300'}`}>
+                        {formatNumber(remaining)} <span className="text-base font-normal opacity-80">ج.م</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -375,7 +392,7 @@ if (!id) return null;
               append({
                 productId: p.productId,
                 quantity: 1,
-                maintenancePrice: p.batches?.[0]?.maintenancePrice || 0
+                maintenancePrice: getMaintenancePrice(p)
               });
             }
           }}
@@ -388,7 +405,9 @@ if (!id) return null;
         isLoading={isDelivering}
         type="info"
         title="تأكيد تسليم الجهاز"
-        message={`سيتم سحب قطع الغيار المستخدمة من المخزن، وإضافة المبلغ المتبقي (${remaining.toLocaleString('ar-EG')} ج.م) إلى الدرج. هل تريد المتابعة؟`}
+        message={hasCredit
+          ? `تنبيه: المدفوع (${formatCurrency(currentPaid)}) أكبر من الإجمالي الحالي (${formatCurrency(currentTotal)}) - راجع سعر الصيانة النهائي قبل المتابعة. سيتم سحب قطع الغيار المستخدمة من المخزن. هل تريد المتابعة؟`
+          : `سيتم سحب قطع الغيار المستخدمة من المخزن، وإضافة المبلغ المتبقي (${formatCurrency(remaining)}) إلى الدرج. هل تريد المتابعة؟`}
         confirmText="تسليم وتحصيل"
       />
       <ConfirmModal

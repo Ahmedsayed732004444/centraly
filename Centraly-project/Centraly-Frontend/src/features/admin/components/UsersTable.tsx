@@ -1,5 +1,8 @@
 import { Edit, Shield } from 'lucide-react';
-import { Button } from '@/shared/components/ui/Button';
+import { RowActions } from '@/shared/components/ui/RowActions';
+import { Avatar } from '@/shared/components/ui/Avatar';
+import { Badge } from '@/shared/components/ui/Badge';
+import { EmptyState } from '@/shared/components/ui/EmptyState';
 interface User {
   id: string;
   username: string;
@@ -18,14 +21,16 @@ export function UsersTable({ users, isLoading, onEdit }: UsersTableProps) {
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-slate-500 font-medium">جاري التحميل...</p>
         </div>
+      ) : users?.length === 0 ? (
+        <EmptyState entity="مستخدمين" />
       ) : (
         <div className="overflow-x-auto -webkit-overflow-scrolling-touch">
           <table className="w-full min-w-[560px] text-right border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-100">
-                <th className="p-4 sm:p-5 px-5 sm:px-8 font-bold text-slate-600 text-sm tracking-wide">تفاصيل المستخدم</th>
-                <th className="p-4 sm:p-5 font-bold text-slate-600 text-sm tracking-wide">الأدوار الممنوحة</th>
-                <th className="p-4 sm:p-5 px-5 sm:px-8 font-bold text-slate-600 text-sm tracking-wide w-20 sm:w-32 text-center">الإجراءات</th>
+              <tr className="border-b border-slate-100">
+                <th className="p-4 sm:p-5 px-5 sm:px-8 font-semibold text-slate-500 text-xs">تفاصيل المستخدم</th>
+                <th className="p-4 sm:p-5 font-semibold text-slate-500 text-xs">الأدوار الممنوحة</th>
+                <th className="p-4 sm:p-5 px-5 sm:px-8 font-semibold text-slate-500 text-xs w-20 sm:w-32 text-center">الإجراءات</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -37,20 +42,18 @@ export function UsersTable({ users, isLoading, onEdit }: UsersTableProps) {
                 >
                   <td className="p-4 sm:p-5 px-5 sm:px-8">
                     <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg border border-indigo-100 shrink-0">
-                        {user.username.charAt(0).toUpperCase()}
-                      </div>
+                      <Avatar name={user.username} />
                       <div className="min-w-0">
-                        <p className="font-bold text-slate-800 text-base truncate">{user.username}</p>
+                        <p className="font-medium text-slate-900 text-sm truncate">{user.username}</p>
                         <p className="text-[13px] text-slate-400 mt-0.5 font-medium font-mono">ID: {user.id.slice(0, 8)}...</p>
                       </div>
                     </div>
                   </td>
                   <td className="p-4 sm:p-5">
                     <div className="flex flex-wrap gap-2">
-                      {user.roles.length === 0 && <span className="text-sm text-slate-400">لا يوجد أدوار</span>}
+                      {user.roles.length === 0 && <Badge variant="neutral">بدون دور</Badge>}
                       {user.roles.map(role => (
-                        <span key={role} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-[13px] font-bold rounded-lg border border-blue-100/60 shadow-sm whitespace-nowrap">
+                        <span key={role} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 text-[13px] font-medium rounded-lg border border-blue-100/60 shadow-sm whitespace-nowrap">
                           <Shield size={14} className="text-blue-500 shrink-0" />
                           {role}
                         </span>
@@ -58,24 +61,10 @@ export function UsersTable({ users, isLoading, onEdit }: UsersTableProps) {
                     </div>
                   </td>
                   <td className="p-4 sm:p-5 px-5 sm:px-8 text-center">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => { e.stopPropagation(); onEdit(user.id); }}
-                      className="bg-white border border-slate-200 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-colors"
-                    >
-                      <Edit size={18} />
-                    </Button>
+                    <RowActions actions={[{ icon: Edit, label: 'تعديل', onClick: () => onEdit(user.id) }]} />
                   </td>
                 </tr>
               ))}
-              {users?.length === 0 && (
-                <tr>
-                  <td colSpan={3} className="p-16 text-center text-slate-500 font-medium text-lg">
-                    لا يوجد مستخدمين مسجلين بعد.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>

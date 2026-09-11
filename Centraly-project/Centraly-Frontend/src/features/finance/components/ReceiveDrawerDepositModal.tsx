@@ -18,6 +18,7 @@ export function ReceiveDrawerDepositModal({ isOpen, onClose, safeId }: ReceiveDr
     formState: { errors },
   } = useForm<ReceiveDrawerDepositRequest>({
     resolver: zodResolver(receiveDrawerDepositSchema),
+    mode: 'onBlur',
     defaultValues: { drawerSessionId: '', amount: 0, notes: '' }
   });
   const onSubmit = (data: ReceiveDrawerDepositRequest) => {

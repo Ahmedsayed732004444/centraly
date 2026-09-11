@@ -26,10 +26,19 @@ export function PurchaseInvoiceSummary({ isSubmitting }: PurchaseInvoiceSummaryP
             <label className={`${tokens.font.label} mb-2 block`}>ملاحظات الفاتورة</label>
             <textarea
               {...register('notes')}
-              rows={3}
+              rows={5}
               className={tokens.input}
               placeholder="أي ملاحظات إضافية على الفاتورة..."
             />
+          </div>
+        </div>
+
+        <div className="w-full md:w-1/3 bg-gray-50 p-6 rounded-xl border border-[var(--color-border)] flex flex-col gap-4">
+          <div className="flex justify-between items-center text-lg">
+            <span className="text-[var(--color-text-muted)]">إجمالي الفاتورة:</span>
+            <span className="font-bold text-[var(--color-text-main)]">
+              {formatCurrency(totalInvoice)}
+            </span>
           </div>
           <div>
             <label className={`${tokens.font.label} mb-2 block`}>
@@ -45,19 +54,6 @@ export function PurchaseInvoiceSummary({ isSubmitting }: PurchaseInvoiceSummaryP
             <p className={`${tokens.font.helperText} mt-1`}>
               اتركه 0 إذا كانت الفاتورة آجلة بالكامل.
             </p>
-          </div>
-        </div>
-
-        <div className="w-full md:w-1/3 bg-gray-50 p-6 rounded-xl border border-[var(--color-border)] flex flex-col gap-4">
-          <div className="flex justify-between items-center text-lg">
-            <span className="text-[var(--color-text-muted)]">إجمالي الفاتورة:</span>
-            <span className="font-bold text-[var(--color-text-main)]">
-              {formatCurrency(totalInvoice)}
-            </span>
-          </div>
-          <div className="flex justify-between items-center text-lg text-green-700">
-            <span>المدفوع:</span>
-            <span className="font-bold">{formatCurrency(watchPaidAmount || 0)}</span>
           </div>
           <div className="h-px bg-gray-300 w-full" />
           <div className="flex justify-between items-center text-xl">

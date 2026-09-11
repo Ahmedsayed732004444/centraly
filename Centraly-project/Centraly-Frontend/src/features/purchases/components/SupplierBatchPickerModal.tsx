@@ -4,6 +4,7 @@ import { useSupplierBatches } from '@/features/suppliers/hooks/useSuppliers';
 import { SupplierBatchResponse } from '@/features/suppliers/schemas/supplierSchemas';
 import { tokens } from '@/shared/styles/tokens';
 import { formatCurrency } from '@/shared/utils/currency';
+import { formatDateOnly } from '@/shared/utils/date';
 import { BaseModal } from '@/shared/components/ui/BaseModal';
 import { Spinner } from '@/shared/components/ui/Spinner';
 interface SupplierBatchPickerModalProps {
@@ -78,7 +79,7 @@ export function SupplierBatchPickerModal({
                     <div className="flex items-center gap-3 mt-1 text-sm text-[var(--color-text-muted)] flex-wrap">
                       {batch.barcode && <span>{batch.barcode}</span>}
                       <span>•</span>
-                      <span>شراء: {new Date(batch.dateReceived).toLocaleDateString('ar-EG')}</span>
+                      <span>شراء: {formatDateOnly(batch.dateReceived)}</span>
                     </div>
                   </div>
                 </div>

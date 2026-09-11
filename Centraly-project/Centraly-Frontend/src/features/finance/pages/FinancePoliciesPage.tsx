@@ -93,10 +93,10 @@ export function FinancePoliciesPage() {
       <div className={`${tokens.card} overflow-hidden`}>
         <div className="overflow-x-auto -webkit-overflow-scrolling-touch">
           <table className="w-full min-w-[640px] text-right">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="border-b border-gray-100">
               <tr>
-                <th className="px-4 sm:px-6 py-4 font-bold text-gray-700 text-sm">نوع العملية المالية</th>
-                <th className="px-4 sm:px-6 py-4 font-bold text-gray-700 text-sm w-56 sm:w-72">السياسة المطبقة (مصدر الأموال)</th>
+                <th className="px-4 sm:px-6 py-3 font-semibold text-gray-500 text-xs">نوع العملية المالية</th>
+                <th className="px-4 sm:px-6 py-3 font-semibold text-gray-500 text-xs w-56 sm:w-72">السياسة المطبقة (مصدر الأموال)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">

@@ -8,6 +8,11 @@ import { RightDrawer } from '@/shared/components/ui/RightDrawer';
 import { ConfirmModal } from '@/shared/components/ui/ConfirmModal';
 import { tokens } from '@/shared/styles/tokens';
 import { useNavigate } from 'react-router-dom';
+import { ExportExcelButton } from '@/shared/components/ui/ExportExcelButton';
+import { exportToExcel } from '@/shared/utils/exportToExcel';
+import { fetchAllPages } from '@/shared/utils/fetchAllPages';
+import { contactsRepository } from '../api/ContactsApi';
+import { formatDateOnly } from '@/shared/utils/date';
 
 export function CustomersPage() {
   const navigate = useNavigate();
@@ -76,7 +81,30 @@ export function CustomersPage() {
         }}
       />
 
-      <CustomersTable 
+      <div className="flex justify-end">
+        <ExportExcelButton
+          onExport={async () => {
+            const rows = await fetchAllPages<CustomerResponse>((pageNumber) =>
+              contactsRepository.getCustomers({ pageNumber, pageSize: 50, searchValue: searchTerm || undefined })
+            );
+            await exportToExcel<CustomerResponse>({
+              fileName: 'العملاء',
+              sheetName: 'العملاء',
+              title: 'سجل العملاء',
+              columns: [
+                { header: 'اسم العميل', value: (r) => r.name },
+                { header: 'رقم الهاتف', value: (r) => r.phone || '-' },
+                { header: 'المديونية', value: (r) => r.debtBalance, money: true },
+                { header: 'عدد الفواتير', value: (r) => r.invoicesCount },
+                { header: 'تاريخ الإضافة', value: (r) => formatDateOnly(r.createdAt) },
+              ],
+              rows,
+            });
+          }}
+        />
+      </div>
+
+      <CustomersTable
         data={data} 
         isLoading={isLoading}
         pageIndex={pageIndex}

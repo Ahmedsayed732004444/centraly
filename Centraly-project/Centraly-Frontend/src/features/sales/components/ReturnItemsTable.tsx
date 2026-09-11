@@ -11,7 +11,7 @@ export function ReturnItemsTable({ invoice, returnItems, onReturnQtyChange }: Re
       <h3 className="text-lg font-semibold mb-4">المنتجات</h3>
       <div className="border border-gray-200 rounded-lg overflow-x-auto">
         <table className="w-full min-w-[560px] text-sm text-right">
-          <thead className="bg-gray-50 text-gray-700">
+          <thead className="text-gray-500 font-semibold text-xs border-b border-gray-100">
             <tr>
               <th className="px-4 py-3">المنتج</th>
               <th className="px-4 py-3">السعر</th>

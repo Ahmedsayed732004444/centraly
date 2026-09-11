@@ -22,6 +22,8 @@ export function TablePagination({
   onNextPage,
   onPrevPage,
 }: TablePaginationProps) {
+  if (totalPages <= 1) return null;
+
   const from = totalCount === 0 ? 0 : (pageIndex - 1) * pageSize + 1;
   const to = Math.min(pageIndex * pageSize, totalCount);
 

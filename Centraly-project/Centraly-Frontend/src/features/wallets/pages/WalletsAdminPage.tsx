@@ -6,11 +6,17 @@ import { RightDrawer } from '@/shared/components/ui/RightDrawer';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { formatDate } from '@/shared/utils/date';
+import { formatDateTime } from '@/shared/utils/date';
+import { formatNumber } from '@/shared/utils/currency';
+import { resolveImageUrl } from '@/shared/utils/resolveImageUrl';
 import { useHeaderStore } from '@/shared/hooks/useHeaderStore';
 import { useNavigate } from 'react-router-dom';
 import { WalletResponse, WalletOperationType } from '../schemas/walletSchemas';
 import { GlobalWalletOperationsTable } from '../components/GlobalWalletOperationsTable';
+import { EmptyState } from '@/shared/components/ui/EmptyState';
+import { Badge } from '@/shared/components/ui/Badge';
+import { RowActions } from '@/shared/components/ui/RowActions';
+import { walletOpLabels } from '../utils/walletOpLabels';
 
 const walletFormSchema = z.object({
   name: z.string().min(1, 'اسم المحفظة مطلوب'),
@@ -38,7 +44,8 @@ export function WalletsAdminPage() {
 
   const form = useForm<WalletFormValues>({
     resolver: zodResolver(walletFormSchema) as any,
-    defaultValues: { 
+    mode: 'onBlur',
+    defaultValues: {
       name: '', 
       phoneNumber: '', 
       ownerName: '', 
@@ -73,8 +80,7 @@ export function WalletsAdminPage() {
     setIsDrawerOpen(true);
   };
 
-  const openEditDrawer = (wallet: WalletResponse, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const openEditDrawer = (wallet: WalletResponse) => {
     setEditingWallet(wallet);
     form.reset({
       name: wallet.name,
@@ -173,26 +179,20 @@ export function WalletsAdminPage() {
             {isLoading ? (
               <div className="p-8 text-center text-gray-500">جاري تحميل المحافظ...</div>
             ) : wallets.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="inline-flex w-16 h-16 rounded-full bg-blue-50 items-center justify-center text-blue-500 mb-4">
-                  <Wallet size={32} />
-                </div>
-                <h3 className="text-lg font-bold text-gray-800 mb-1">لا يوجد محافظ مسجلة</h3>
-                <p className="text-gray-500 mb-4">قم بإضافة أول محفظة للبدء في العمليات</p>
-              </div>
+              <EmptyState entity="محافظ" icon={Wallet} />
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-right">
-              <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
+              <thead className="text-slate-500 border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-4 font-semibold whitespace-nowrap">اسم المحفظة</th>
-                  <th className="px-6 py-4 font-semibold whitespace-nowrap">العمليات المتاحة</th>
-                  <th className="px-6 py-4 font-semibold whitespace-nowrap">رقم التليفون</th>
-                  <th className="px-6 py-4 font-semibold whitespace-nowrap">اسم المالك</th>
-                  <th className="px-6 py-4 font-semibold whitespace-nowrap">الرصيد الحالي</th>
-                  <th className="px-6 py-4 font-semibold whitespace-nowrap">تاريخ الإنشاء</th>
-                  <th className="px-6 py-4 font-semibold whitespace-nowrap">الحالة</th>
-                  <th className="px-6 py-4 font-semibold whitespace-nowrap">إجراءات</th>
+                  <th className="px-6 py-3 text-xs font-semibold whitespace-nowrap">اسم المحفظة</th>
+                  <th className="px-6 py-3 text-xs font-semibold whitespace-nowrap">العمليات المتاحة</th>
+                  <th className="px-6 py-3 text-xs font-semibold whitespace-nowrap">رقم التليفون</th>
+                  <th className="px-6 py-3 text-xs font-semibold whitespace-nowrap">اسم المالك</th>
+                  <th className="px-6 py-3 text-xs font-semibold whitespace-nowrap">الرصيد الحالي</th>
+                  <th className="px-6 py-3 text-xs font-semibold whitespace-nowrap">تاريخ الإنشاء</th>
+                  <th className="px-6 py-3 text-xs font-semibold whitespace-nowrap">الحالة</th>
+                  <th className="px-6 py-3 text-xs font-semibold whitespace-nowrap">إجراءات</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -205,7 +205,7 @@ export function WalletsAdminPage() {
                     <td className="px-6 py-4 font-medium text-slate-800 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         {wallet.imageUrl ? (
-                          <img src={wallet.imageUrl.startsWith('http') ? wallet.imageUrl : `${import.meta.env.VITE_API_BASE_URL ?? 'https://localhost:7073'}${wallet.imageUrl}`} alt={wallet.name} className="w-8 h-8 rounded-full object-cover border border-gray-200 shrink-0" />
+                          <img src={resolveImageUrl(wallet.imageUrl)} alt={wallet.name} className="w-8 h-8 rounded-full object-cover border border-gray-200 shrink-0" />
                         ) : (
                           <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
                             <Wallet size={16} />
@@ -220,48 +220,28 @@ export function WalletsAdminPage() {
                           ? wallet.allowedOperations
                           : [WalletOperationType.CashIn, WalletOperationType.CashOut]
                         ).map(op => (
-                          <span
-                            key={op}
-                            className={`px-2 py-0.5 text-xs font-semibold rounded-md ${
-                              op === WalletOperationType.CashIn
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : op === WalletOperationType.CashOut
-                                ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                                : 'bg-blue-50 text-blue-700 border border-blue-200'
-                            }`}
-                          >
-                            {op === WalletOperationType.CashIn ? 'بيع' : op === WalletOperationType.CashOut ? 'سحب' : 'رصيد'}
-                          </span>
+                          <Badge key={op} variant={walletOpLabels[op].variant}>{walletOpLabels[op].label}</Badge>
                         ))}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-slate-500 whitespace-nowrap" dir="ltr">{wallet.phoneNumber}</td>
                     <td className="px-6 py-4 text-slate-500 whitespace-nowrap">{wallet.ownerName || '-'}</td>
-                    <td className="px-6 py-4 font-bold text-[#0f8e4c] font-mono whitespace-nowrap">
-                      {wallet.balance.toFixed(2)}
+                    <td className="px-6 py-4 font-semibold text-[#0f8e4c] font-mono whitespace-nowrap">
+                      {formatNumber(wallet.balance)}
                     </td>
-                    <td className="px-6 py-4 text-slate-500 whitespace-nowrap">{formatDate(wallet.createdAt)}</td>
+                    <td className="px-6 py-4 text-slate-500 whitespace-nowrap">{formatDateTime(wallet.createdAt)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${wallet.isActive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                      <Badge variant={wallet.isActive ? 'success' : 'danger'}>
                         {wallet.isActive ? 'نشط' : 'غير نشط'}
-                      </span>
+                      </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={(e) => openEditDrawer(wallet, e)}
-                          className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                          title="تعديل"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        <button
-                          className="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-                          title="التفاصيل"
-                        >
-                          <Info size={18} />
-                        </button>
-                      </div>
+                      <RowActions
+                        actions={[
+                          { icon: Edit2, label: 'تعديل', onClick: () => openEditDrawer(wallet) },
+                          { icon: Info, label: 'التفاصيل', onClick: () => navigate(`/wallets/${wallet.id}`) },
+                        ]}
+                      />
                     </td>
                   </tr>
                 ))}

@@ -1,7 +1,10 @@
 import { formatCurrency } from '@/shared/utils/currency';
-import { formatDate } from '@/shared/utils/date';
+import { formatDateTime } from '@/shared/utils/date';
 import { SafeTransactionResponse } from '../schemas/financeSchemas';
 import { DRAWER_TRANSACTION_TYPE_LABELS } from '@/shared/utils/enumLabels';
+import { safeTxDirection, directionStyles } from '@/shared/utils/moneyDirection';
+import { DirectionBadge } from '@/shared/components/ui/Badge';
+import { EmptyState } from '@/shared/components/ui/EmptyState';
 interface SafeTransactionsTableProps {
   transactions: SafeTransactionResponse[] | any;
 }
@@ -35,8 +38,8 @@ export function SafeTransactionsTable({ transactions }: SafeTransactionsTablePro
   const txList = Array.isArray(transactions) ? transactions : (transactions?.items || []);
   if (!txList || txList.length === 0) {
     return (
-      <div className="text-center py-12 bg-white rounded-xl border border-gray-100 px-4">
-        <p className="text-gray-500">لا توجد حركات مسجلة في هذه الخزينة حتى الآن.</p>
+      <div className="bg-white rounded-xl border border-gray-100">
+        <EmptyState entity="حركات في هذه الخزينة" />
       </div>
     );
   }
@@ -44,34 +47,34 @@ export function SafeTransactionsTable({ transactions }: SafeTransactionsTablePro
     <div className="overflow-x-auto bg-white rounded-xl border border-gray-200 -webkit-overflow-scrolling-touch">
       <table className="w-full min-w-[820px] text-right border-collapse">
         <thead>
-          <tr className="bg-gray-50 border-b border-gray-200">
-            <th className="px-4 py-3 text-sm font-semibold text-gray-600 whitespace-nowrap">التاريخ</th>
-            <th className="px-4 py-3 text-sm font-semibold text-gray-600 whitespace-nowrap">النوع</th>
-            <th className="px-4 py-3 text-sm font-semibold text-gray-600 whitespace-nowrap">التصنيف</th>
-            <th className="px-4 py-3 text-sm font-semibold text-gray-600 whitespace-nowrap">المبلغ</th>
-            <th className="px-4 py-3 text-sm font-semibold text-gray-600 whitespace-nowrap">الرصيد بعد الحركة</th>
-            <th className="px-4 py-3 text-sm font-semibold text-gray-600">ملاحظات</th>
+          <tr className="border-b border-gray-100">
+            <th className="px-4 py-3 text-xs font-semibold text-gray-500 whitespace-nowrap">التاريخ</th>
+            <th className="px-4 py-3 text-xs font-semibold text-gray-500 whitespace-nowrap">النوع</th>
+            <th className="px-4 py-3 text-xs font-semibold text-gray-500 whitespace-nowrap">التصنيف</th>
+            <th className="px-4 py-3 text-xs font-semibold text-gray-500 whitespace-nowrap">المبلغ</th>
+            <th className="px-4 py-3 text-xs font-semibold text-gray-500 whitespace-nowrap">الرصيد بعد الحركة</th>
+            <th className="px-4 py-3 text-xs font-semibold text-gray-500">ملاحظات</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
           {txList.map((tx: SafeTransactionResponse) => {
-            const isIncome = tx.transactionType === 'Income' || tx.amount > 0;
+            const direction = safeTxDirection(tx.transactionType);
             return (
               <tr key={tx.id} className="hover:bg-gray-50/50 transition-colors">
                 <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap" dir="ltr">
-                  {formatDate(tx.createdAt)}
+                  {formatDateTime(tx.createdAt)}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${isIncome ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                  <DirectionBadge direction={direction}>
                     {TYPE_TRANSLATIONS[tx.transactionType] || tx.transactionType}
-                  </span>
+                  </DirectionBadge>
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">
                   {tx.category ? (CATEGORY_TRANSLATIONS[tx.category] || tx.category) : '-'}
                 </td>
                 <td className="px-4 py-3 font-semibold text-gray-800 whitespace-nowrap" dir="ltr">
-                  <span className={isIncome ? 'text-green-600' : 'text-red-600'}>
-                    {isIncome ? '+' : '-'} {formatCurrency(Math.abs(tx.amount))}
+                  <span className={directionStyles[direction].text}>
+                    {directionStyles[direction].sign} {formatCurrency(Math.abs(tx.amount))}
                   </span>
                 </td>
                 <td className="px-4 py-3 font-semibold text-gray-800 whitespace-nowrap" dir="ltr">

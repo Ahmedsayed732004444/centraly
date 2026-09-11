@@ -20,6 +20,7 @@ export function RoleFormModal({ isOpen, onClose, roleId }: RoleFormModalProps) {
   const [groupedPermissions, setGroupedPermissions] = useState<Record<string, string[]>>({});
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm<RoleFormData>({
     resolver: zodResolver(roleFormSchema),
+    mode: 'onBlur',
     defaultValues: { name: '', permissions: [] }
   });
   useEffect(() => {

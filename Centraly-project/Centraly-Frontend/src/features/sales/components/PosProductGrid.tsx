@@ -4,6 +4,8 @@ import { Search, Package, ShoppingCart, ChevronRight, ChevronLeft } from 'lucide
 import { ProductResponse, CategorySummary } from '@/features/inventory/schemas/inventorySchemas';
 import { useCategories, useDepartments } from '@/features/inventory/hooks/useInventory';
 import { Spinner } from '@/shared/components/ui/Spinner';
+import { Avatar } from '@/shared/components/ui/Avatar';
+import { EmptyState } from '@/shared/components/ui/EmptyState';
 interface PosProductGridProps {
   products: ProductResponse[];
   isLoading: boolean;
@@ -49,6 +51,18 @@ export function PosProductGrid({
               placeholder="ابحث عن منتج بالاسم أو امسح الباركود"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                // Barcode scanners type-then-Enter just like a keyboard. When the search
+                // has narrowed to exactly one in-stock product, Enter adds it straight to
+                // the cart instead of making the cashier reach for the mouse to click it.
+                if (e.key !== 'Enter') return;
+                if (products.length !== 1) return;
+                const only = products[0];
+                if (only.totalQuantity <= 0) return;
+                e.preventDefault();
+                onProductClick(only);
+                setSearchTerm('');
+              }}
               className={`${tokens.input} pl-12 h-full text-sm sm:text-base`}
               autoFocus
             />
@@ -117,10 +131,7 @@ export function PosProductGrid({
               <Spinner size={40} />
             </div>
           ) : products.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400">
-              <Package size={64} className="text-gray-300 mb-4" />
-              <p className="text-xl font-semibold">لا توجد منتجات</p>
-            </div>
+            <EmptyState entity="منتجات" icon={Package} className="h-full" />
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 auto-rows-fr gap-3 sm:gap-4 content-start">
               {products.map(product => {
@@ -161,7 +172,7 @@ export function PosProductGrid({
                       {imageSrc ? (
                         <img src={imageSrc} alt={product.name} className="max-h-full max-w-full object-contain mix-blend-multiply" />
                       ) : (
-                        <Package size={48} className="text-gray-200" />
+                        <Avatar name={product.name || '?'} size="xl" />
                       )}
                     </div>
                     <div className="flex flex-col flex-1 items-center text-center min-h-0">
@@ -173,7 +184,11 @@ export function PosProductGrid({
                           ? Object.values(product.properties).join(' - ')
                           : product.category.name}
                       </p>
-                      <div className="mt-auto mb-2 sm:mb-3 font-bold text-[11px] sm:text-[12px] text-[#0f8e4c] shrink-0">
+                      <div
+                        className={`mt-auto mb-2 sm:mb-3 font-bold text-[11px] sm:text-[12px] shrink-0 ${
+                          !hasStock ? 'text-[#c5221f]' : isLowStock ? 'text-[#ea8600]' : 'text-[#0f8e4c]'
+                        }`}
+                      >
                         المخزون: {product.totalQuantity}
                       </div>
                       <button

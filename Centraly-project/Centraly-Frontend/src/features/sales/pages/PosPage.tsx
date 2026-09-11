@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useHeaderStore } from '@/shared/hooks/useHeaderStore';
+import { useDebounce } from '@/shared/hooks/useDebounce';
 import { useProducts } from '@/features/inventory/hooks/useInventory';
 import { ProductResponse, ProductBatchResponse, ProductUsageDto } from '@/features/inventory/schemas/inventorySchemas';
 import { PosProductGrid } from '../components/PosProductGrid';
@@ -17,6 +18,7 @@ export function PosPage() {
   const { setTitle, setBackButton } = useHeaderStore();
   const cart = usePosCart();
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 350);
   const [selectedDepartmentId, setSelectedDepartmentId] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [pageNumber, setPageNumber] = useState(1);
@@ -28,7 +30,7 @@ export function PosPage() {
   const { data: productsData, isLoading: isLoadingProducts } = useProducts({
     pageNumber: pageNumber,
     pageSize: 8,
-    searchValue: searchTerm || undefined,
+    searchValue: debouncedSearchTerm || undefined,
     categoryId: selectedCategoryId || undefined,
     departmentId: selectedDepartmentId || undefined,
     excludeUsage: ProductUsageDto.MaintenanceOnly,
@@ -36,7 +38,7 @@ export function PosPage() {
   const createInvoiceMutation = useCreateSalesInvoice();
   useEffect(() => {
     setPageNumber(1);
-  }, [searchTerm, selectedDepartmentId, selectedCategoryId]);
+  }, [debouncedSearchTerm, selectedDepartmentId, selectedCategoryId]);
   useEffect(() => {
     setTitle('نقطة البيع (POS)');
     setBackButton(false);

@@ -1,9 +1,14 @@
 import { formatCurrency } from '@/shared/utils/currency';
 import { tokens } from '@/shared/styles/tokens';
 import { SupplierStatementItemResponse } from '../schemas/supplierSchemas';
+import { EmptyState } from '@/shared/components/ui/EmptyState';
+import { formatDateTime } from '@/shared/utils/date';
+import { ExportExcelButton } from '@/shared/components/ui/ExportExcelButton';
+import { exportToExcel } from '@/shared/utils/exportToExcel';
 interface SupplierStatementCardProps {
   statement?: SupplierStatementItemResponse[];
   isLoading: boolean;
+  supplierName?: string;
 }
 const translateTxType = (type: string) => {
   const map: Record<string, string> = {
@@ -15,15 +20,33 @@ const translateTxType = (type: string) => {
   };
   return map[type] || type;
 };
-export function SupplierStatementCard({ statement, isLoading }: SupplierStatementCardProps) {
+export function SupplierStatementCard({ statement, isLoading, supplierName }: SupplierStatementCardProps) {
   return (
     <div className={`${tokens.card} bg-white overflow-hidden`}>
-      <div className="p-4 border-b border-gray-100">
+      <div className="p-4 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
         <h3 className="text-lg font-bold text-gray-800">كشف الحساب (حركة المورد)</h3>
+        <ExportExcelButton
+          onExport={async () => {
+            await exportToExcel<SupplierStatementItemResponse>({
+              fileName: `كشف-حساب-${supplierName || 'مورد'}`,
+              sheetName: 'كشف الحساب',
+              title: `كشف حساب المورد: ${supplierName || ''}`,
+              columns: [
+                { header: 'تاريخ الحركة', value: (r) => formatDateTime(r.date) },
+                { header: 'البيان', value: (r) => translateTxType(r.transactionType) },
+                { header: 'خصم من حسابه', value: (r) => (r.debit > 0 ? r.debit : ''), money: true },
+                { header: 'أضيف لحسابه', value: (r) => (r.credit > 0 ? r.credit : ''), money: true },
+                { header: 'صافي الحساب', value: (r) => r.balanceAfter, money: true },
+                { header: 'ملاحظات', value: (r) => r.notes || '-', width: 30, align: 'right' },
+              ],
+              rows: statement || [],
+            });
+          }}
+        />
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-right">
-          <thead className="bg-gray-50/50 text-gray-500 font-medium">
+          <thead className="text-gray-500 font-semibold text-xs border-b border-gray-100">
             <tr>
               <th className="px-4 py-3 whitespace-nowrap">تاريخ الحركة</th>
               <th className="px-4 py-3 whitespace-nowrap">البيان (نوع الحركة)</th>
@@ -44,7 +67,7 @@ export function SupplierStatementCard({ statement, isLoading }: SupplierStatemen
               statement.map((item, idx) => (
                 <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-4 py-3 whitespace-nowrap" dir="ltr">
-                    {new Intl.DateTimeFormat('ar-EG', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(item.date))}
+                    {formatDateTime(item.date)}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-semibold">
@@ -65,8 +88,8 @@ export function SupplierStatementCard({ statement, isLoading }: SupplierStatemen
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
-                  لا توجد حركات مسجلة لهذا المورد حتى الآن.
+                <td colSpan={6}>
+                  <EmptyState entity="حركات مسجلة لهذا المورد" />
                 </td>
               </tr>
             )}

@@ -1,7 +1,10 @@
 import { MaintenanceSummary } from '../schemas/maintenanceSchemas';
-import { Clock, User, Phone, Wrench, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Clock, Phone, Wrench, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TablePagination } from '@/shared/components/ui/TablePagination';
+import { formatCurrency, formatNumber } from '@/shared/utils/currency';
+import { EmptyState } from '@/shared/components/ui/EmptyState';
+import { Avatar } from '@/shared/components/ui/Avatar';
 interface Props {
   tickets: MaintenanceSummary[];
   isLoading: boolean;
@@ -13,7 +16,9 @@ interface Props {
   onNextPage: () => void;
   onPrevPage: () => void;
 }
-const statusConfig: Record<string, { label: string; color: string }> = {
+// Exported so MaintenanceDetailDrawer uses the exact same colors instead of its own
+// copy (tokens.badge.statusPending/Delivered/Returned used to disagree with these).
+export const statusConfig: Record<string, { label: string; color: string }> = {
   Pending: { label: 'قيد الانتظار', color: 'bg-amber-100 text-amber-800 border-amber-200' },
   Delivered: { label: 'تم التسليم', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
   Returned: { label: 'مرتجع', color: 'bg-slate-100 text-slate-800 border-slate-200' },
@@ -29,9 +34,9 @@ function formatDateInfo(dateStr?: string, status?: string) {
   }
   const d = new Date(dateStr);
   const now = new Date();
-  const dayName = d.toLocaleDateString('ar-EG', { weekday: 'long' });
-  const timeStr = d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true });
-  const dayMonth = d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
+  const dayName = d.toLocaleDateString('ar-EG-u-nu-latn', { weekday: 'long' });
+  const timeStr = d.toLocaleTimeString('ar-EG-u-nu-latn', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const dayMonth = d.toLocaleDateString('ar-EG-u-nu-latn', { day: 'numeric', month: 'long' });
   const fullSecondary = `${timeStr} · ${dayMonth}`;
   if (status !== 'Pending') {
     return {
@@ -91,15 +96,7 @@ export function MaintenanceListTable({
     );
   }
   if (tickets.length === 0) {
-    return (
-      <div className="p-8 sm:p-16 text-center flex flex-col items-center justify-center">
-        <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mb-5">
-          <Wrench className="w-10 h-10 text-slate-300" />
-        </div>
-        <h3 className="text-xl font-bold text-slate-700 mb-2">لا توجد تذاكر صيانة</h3>
-        <p className="text-slate-400 text-base">لم يتم العثور على أي تذاكر مطابقة للفلتر الحالي.</p>
-      </div>
-    );
+    return <EmptyState entity="تذاكر صيانة" icon={Wrench} />;
   }
   return (
     <div>
@@ -107,12 +104,12 @@ export function MaintenanceListTable({
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-right">
           <thead>
-            <tr className="border-b border-slate-100 bg-slate-50/70 text-slate-500">
-              <th className="px-6 py-4 text-[14px] font-bold whitespace-nowrap">رقم / حالة</th>
-              <th className="px-6 py-4 text-[14px] font-bold whitespace-nowrap">العميل</th>
-              <th className="px-6 py-4 text-[14px] font-bold">الجهاز والمشكلة</th>
-              <th className="px-6 py-4 text-[14px] font-bold whitespace-nowrap text-center">الماليات</th>
-              <th className="px-6 py-4 text-[14px] font-bold whitespace-nowrap">موعد التسليم</th>
+            <tr className="border-b border-slate-100 text-slate-500">
+              <th className="px-6 py-3 text-xs font-semibold whitespace-nowrap">رقم / حالة</th>
+              <th className="px-6 py-3 text-xs font-semibold whitespace-nowrap">العميل</th>
+              <th className="px-6 py-3 text-xs font-semibold">الجهاز والمشكلة</th>
+              <th className="px-6 py-3 text-xs font-semibold whitespace-nowrap text-center">الماليات</th>
+              <th className="px-6 py-3 text-xs font-semibold whitespace-nowrap">موعد التسليم</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -142,11 +139,9 @@ export function MaintenanceListTable({
                   {}
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-full bg-blue-100/80 text-blue-600 flex items-center justify-center shrink-0">
-                        <User className="w-5 h-5" />
-                      </div>
+                      <Avatar name={t.customerName} />
                       <div>
-                        <div className="font-extrabold text-slate-800 text-base">{t.customerName}</div>
+                        <div className="font-medium text-slate-900 text-sm">{t.customerName}</div>
                         {t.customerPhone && (
                           <div className="text-sm font-medium text-slate-500 flex items-center gap-1.5 mt-1">
                             <Phone className="w-3.5 h-3.5" />
@@ -158,7 +153,7 @@ export function MaintenanceListTable({
                   </td>
                   {}
                   <td className="px-6 py-5 max-w-[280px]">
-                    <div className="font-extrabold text-slate-800 text-base mb-1.5 truncate">
+                    <div className="font-medium text-slate-900 text-sm mb-1.5 truncate">
                       {t.deviceDescription || 'غير محدد'}
                     </div>
                     {t.problem && (
@@ -171,15 +166,15 @@ export function MaintenanceListTable({
                   <td className="px-6 py-5 text-center">
                     <div className="inline-flex flex-col items-center justify-center">
                       <div className="font-black text-slate-900 text-lg">
-                        {t.totalPrice.toLocaleString('ar-EG')} ج.م
+                        {formatCurrency(t.totalPrice)}
                       </div>
                       <div className="text-[13px] mt-1.5 flex gap-2.5 items-center">
                         <span className="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-md" title="المدفوع">
-                          {t.paidAmount > 0 ? `+${t.paidAmount.toLocaleString('ar-EG')}` : '0'}
+                          {t.paidAmount > 0 ? `+${formatNumber(t.paidAmount)}` : '0'}
                         </span>
                         {t.remainingAmount > 0 ? (
                           <span className="text-red-500 font-extrabold bg-red-50 px-2 py-0.5 rounded-md" title="الباقي">
-                            باقي {t.remainingAmount.toLocaleString('ar-EG')}
+                            باقي {formatNumber(t.remainingAmount)}
                           </span>
                         ) : (
                           <span className="text-emerald-600 font-extrabold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-md">
@@ -231,9 +226,7 @@ export function MaintenanceListTable({
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-blue-100/80 text-blue-600 flex items-center justify-center shrink-0">
-                    <User className="w-4.5 h-4.5" />
-                  </div>
+                  <Avatar name={t.customerName} size="sm" />
                   <div className="min-w-0">
                     <div className="font-extrabold text-slate-800 text-[15px] truncate">{t.customerName}</div>
                     {t.customerPhone && (
@@ -269,10 +262,10 @@ export function MaintenanceListTable({
                 </div>
                 <div className="text-left shrink-0">
                   <div className="font-black text-slate-900 text-[15px]">
-                    {t.totalPrice.toLocaleString('ar-EG')} ج.م
+                    {formatCurrency(t.totalPrice)}
                   </div>
                   {t.remainingAmount > 0 ? (
-                    <span className="text-red-500 font-bold text-xs">باقي {t.remainingAmount.toLocaleString('ar-EG')}</span>
+                    <span className="text-red-500 font-bold text-xs">باقي {formatNumber(t.remainingAmount)}</span>
                   ) : (
                     <span className="text-emerald-600 font-bold text-xs flex items-center gap-1 justify-end">
                       <CheckCircle2 className="w-3 h-3" /> مسدد

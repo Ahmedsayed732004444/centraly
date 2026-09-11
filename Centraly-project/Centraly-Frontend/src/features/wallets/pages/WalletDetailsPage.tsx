@@ -3,9 +3,20 @@ import { useParams } from 'react-router-dom';
 import { useWalletDetails } from '../hooks/useWalletDetails';
 import { useHeaderStore } from '@/shared/hooks/useHeaderStore';
 import { Wallet, ArrowDownToLine, ArrowUpFromLine, ChevronLeft, ChevronRight, TrendingUp, Filter, Smartphone } from 'lucide-react';
-import { formatDate, toUtcStartOfDayISOString, toUtcEndOfDayISOString } from '@/shared/utils/date';
+import { formatDateTime, toUtcStartOfDayISOString, toUtcEndOfDayISOString } from '@/shared/utils/date';
+import { formatNumber } from '@/shared/utils/currency';
+import { resolveImageUrl } from '@/shared/utils/resolveImageUrl';
 import { WalletOperationType, WalletOperationResponse } from '../schemas/walletSchemas';
-import { tokens } from '@/shared/styles/tokens';
+import { walletOpLabels } from '../utils/walletOpLabels';
+import { Badge } from '@/shared/components/ui/Badge';
+import { EmptyState } from '@/shared/components/ui/EmptyState';
+import { DateRangeFilter } from '@/shared/components/ui/DateRangeFilter';
+
+const walletOpIcons: Record<WalletOperationType, typeof Smartphone> = {
+  [WalletOperationType.CashIn]: ArrowDownToLine,
+  [WalletOperationType.CashOut]: ArrowUpFromLine,
+  [WalletOperationType.Recharge]: Smartphone,
+};
 export function WalletDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const { setTitle, setBackButton } = useHeaderStore();
@@ -38,7 +49,7 @@ export function WalletDetailsPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col sm:flex-row items-center gap-5 md:col-span-2">
           <div className="w-20 h-20 rounded-[20px] bg-blue-50 flex items-center justify-center border border-gray-100 overflow-hidden shrink-0">
             {wallet.imageUrl ? (
-              <img src={wallet.imageUrl.startsWith('http') ? wallet.imageUrl : `${import.meta.env.VITE_API_BASE_URL ?? 'https://localhost:7073'}${wallet.imageUrl}`} alt={wallet.name} className="w-full h-full object-cover" />
+              <img src={resolveImageUrl(wallet.imageUrl)} alt={wallet.name} className="w-full h-full object-cover" />
             ) : (
               <Wallet size={36} className="text-blue-500" />
             )}
@@ -47,18 +58,18 @@ export function WalletDetailsPage() {
             <h1 className="text-2xl font-bold text-gray-900 mb-1 truncate">{wallet.name}</h1>
             <p className="text-gray-500 text-lg mb-2" dir="ltr">{wallet.phoneNumber}</p>
             <div className="flex flex-wrap justify-center sm:justify-start gap-3">
-              <span className={`px-3 py-1 text-sm font-medium rounded-lg ${wallet.isActive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+              <Badge variant={wallet.isActive ? 'success' : 'danger'} className="text-sm">
                 {wallet.isActive ? 'نشط' : 'غير نشط'}
-              </span>
+              </Badge>
               <span className="px-3 py-1 text-sm font-medium bg-gray-50 text-gray-600 rounded-lg">
-                تاريخ الإنشاء: {formatDate(wallet.createdAt)}
+                تاريخ الإنشاء: {formatDateTime(wallet.createdAt)}
               </span>
             </div>
           </div>
           <div className="w-full sm:w-auto sm:mr-auto text-center pt-4 sm:pt-0 sm:pr-6 border-t sm:border-t-0 sm:border-r border-gray-100 shrink-0">
             <p className="text-gray-500 font-medium mb-1">الرصيد الحالي</p>
             <p className="text-3xl font-black text-[#0f8e4c] font-mono">
-              {(wallet.balance || 0).toFixed(2)}
+              {formatNumber(wallet.balance || 0)}
             </p>
           </div>
         </div>
@@ -68,7 +79,7 @@ export function WalletDetailsPage() {
           </div>
           <p className="text-gray-500 font-medium mb-1">صافي الأرباح (لكل العمليات)</p>
           <p className={`text-3xl font-black font-mono dir-ltr ${isProfitable ? 'text-green-600' : 'text-red-600'}`}>
-            {isProfitable ? '+' : ''}{(wallet.netProfit || 0).toFixed(2)}
+            {isProfitable ? '+' : ''}{formatNumber(wallet.netProfit || 0)}
           </p>
         </div>
       </div>
@@ -94,29 +105,17 @@ export function WalletDetailsPage() {
                 <option value={WalletOperationType.Recharge}>رصيد</option>
               </select>
             </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <input
-                type="date"
-                value={dateFrom}
-                onChange={e => { setDateFrom(e.target.value); setPageNumber(1); }}
-                className={tokens.input + " py-1.5 text-sm w-full sm:w-auto min-w-0"}
-                title="من تاريخ"
-              />
-              <span className="text-gray-400 shrink-0">-</span>
-              <input
-                type="date"
-                value={dateTo}
-                onChange={e => { setDateTo(e.target.value); setPageNumber(1); }}
-                className={tokens.input + " py-1.5 text-sm w-full sm:w-auto min-w-0"}
-                title="إلى تاريخ"
-              />
-            </div>
+            <DateRangeFilter
+              startDate={dateFrom}
+              endDate={dateTo}
+              onChange={(start, end) => { setDateFrom(start); setDateTo(end); setPageNumber(1); }}
+            />
           </div>
         </div>
         {isLoadingOperations ? (
           <div className="p-8 text-center text-gray-500">جاري تحميل السجل...</div>
         ) : operations.length === 0 ? (
-          <div className="p-12 text-center text-gray-400">لا يوجد عمليات تطابق البحث</div>
+          <EmptyState entity="عمليات تطابق البحث" />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-right">
@@ -131,28 +130,20 @@ export function WalletDetailsPage() {
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {operations.map((op: WalletOperationResponse) => {
-                  const isDeposit = op.operationType === WalletOperationType.CashIn;
-                  const isRecharge = op.operationType === WalletOperationType.Recharge;
+                  const Icon = walletOpIcons[op.operationType];
                   return (
                     <tr key={op.id} className="hover:bg-slate-50/50">
-                      <td className="px-6 py-4 text-slate-600 whitespace-nowrap">{formatDate(op.createdAt)}</td>
+                      <td className="px-6 py-4 text-slate-600 whitespace-nowrap">{formatDateTime(op.createdAt)}</td>
                       <td className="px-6 py-4">
-                        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold whitespace-nowrap ${
-                          isRecharge
-                            ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                            : isDeposit
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : 'bg-rose-50 text-rose-700 border border-rose-200'
-                        }`}>
-                          {isRecharge ? <Smartphone size={14} /> : isDeposit ? <ArrowDownToLine size={14} /> : <ArrowUpFromLine size={14} />}
-                          {isRecharge ? 'رصيد' : isDeposit ? 'بيع' : 'سحب'}
-                        </div>
+                        <Badge variant={walletOpLabels[op.operationType].variant} icon={<Icon size={14} />}>
+                          {walletOpLabels[op.operationType].label}
+                        </Badge>
                       </td>
-                      <td className="px-6 py-4 font-mono font-medium text-slate-700 whitespace-nowrap">{op.transferredAmount.toFixed(2)}</td>
-                      <td className="px-6 py-4 font-mono font-medium text-slate-700 whitespace-nowrap">{op.physicalCashAmount.toFixed(2)}</td>
+                      <td className="px-6 py-4 font-mono font-medium text-slate-700 whitespace-nowrap">{formatNumber(op.transferredAmount)}</td>
+                      <td className="px-6 py-4 font-mono font-medium text-slate-700 whitespace-nowrap">{formatNumber(op.physicalCashAmount)}</td>
                       <td className="px-6 py-4 font-mono font-bold whitespace-nowrap">
                         <span className={op.profit > 0 ? 'text-green-600' : op.profit < 0 ? 'text-red-600' : 'text-gray-400'}>
-                          {op.profit > 0 ? '+' : ''}{op.profit.toFixed(2)}
+                          {op.profit > 0 ? '+' : ''}{formatNumber(op.profit)}
                         </span>
                       </td>
                     </tr>

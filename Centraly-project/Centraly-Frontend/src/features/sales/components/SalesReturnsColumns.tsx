@@ -1,8 +1,9 @@
 import { formatCurrency } from '@/shared/utils/currency';
-import { formatDate } from '@/shared/utils/date';
+import { formatDateOnly } from '@/shared/utils/date';
 import { ReturnReason, SalesReturnResponse } from '../schemas/salesSchemas';
+import { Badge } from '@/shared/components/ui/Badge';
 
-const getReasonLabel = (reason: ReturnReason) => {
+export const getReasonLabel = (reason: ReturnReason) => {
   switch (reason) {
     case ReturnReason.Defect: return 'تالف / عيب صناعة';
     case ReturnReason.ChangedMind: return 'تغيير رأي العميل';
@@ -14,7 +15,7 @@ const getReasonLabel = (reason: ReturnReason) => {
 export const getSalesReturnsColumns = () => [
   {
     header: 'تاريخ المرتجع',
-    cell: (row: SalesReturnResponse) => formatDate(row.returnDate),
+    cell: (row: SalesReturnResponse) => formatDateOnly(row.returnDate),
   },
   {
     header: 'رقم الفاتورة الأصلية',
@@ -27,9 +28,9 @@ export const getSalesReturnsColumns = () => [
   {
     header: 'طريقة الاسترداد',
     cell: (row: SalesReturnResponse) => (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.isCashRefund ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'}`}>
+      <Badge variant={row.isCashRefund ? 'warning' : 'indigo'}>
         {row.isCashRefund ? 'نقدي (كاش)' : 'خصم من المديونية'}
-      </span>
+      </Badge>
     ),
   },
   {

@@ -36,11 +36,15 @@ function WidgetCard({ to, icon, iconBg, title, children, linkLabel }: WidgetCard
 // route access to /finance/drawer, /inventory/products and /maintenance (see App.tsx),
 // so these four widgets don't need their own permission gating - they mirror what the
 // sidebar already shows each role.
+function NumberSkeleton() {
+  return <div className="h-8 w-14 rounded-md bg-gray-100 animate-pulse" />;
+}
+
 export function DashboardPage() {
-  const { data: activeDrawer, isError: drawerError } = useActiveDrawer(1);
-  const { data: lowStock } = useProducts({ pageNumber: 1, pageSize: 5, stockStatus: 'LowStock' });
-  const { data: outOfStock } = useProducts({ pageNumber: 1, pageSize: 1, stockStatus: 'OutOfStock' });
-  const { data: pendingMaintenance } = useMaintenanceList({ pageNumber: 1, pageSize: 50, status: 'Pending' });
+  const { data: activeDrawer, isError: drawerError, isLoading: isLoadingDrawer } = useActiveDrawer(1);
+  const { data: lowStock, isLoading: isLoadingLowStock } = useProducts({ pageNumber: 1, pageSize: 5, stockStatus: 'LowStock' });
+  const { data: outOfStock, isLoading: isLoadingOutOfStock } = useProducts({ pageNumber: 1, pageSize: 1, stockStatus: 'OutOfStock' });
+  const { data: pendingMaintenance, isLoading: isLoadingMaintenance } = useMaintenanceList({ pageNumber: 1, pageSize: 50, status: 'Pending' });
 
   const currentBalance = activeDrawer
     ? activeDrawer.transactions[0]?.balance ?? activeDrawer.openingBalance
@@ -65,7 +69,9 @@ export function DashboardPage() {
           title="رصيد الدرج الحالي"
           linkLabel="فتح الدرج"
         >
-          {drawerError || !activeDrawer ? (
+          {isLoadingDrawer ? (
+            <NumberSkeleton />
+          ) : drawerError || !activeDrawer ? (
             <p className="text-sm text-gray-400">لا توجد وردية مفتوحة حالياً</p>
           ) : (
             <p className="text-2xl font-black text-gray-800" dir="ltr">{formatCurrency(currentBalance ?? 0)}</p>
@@ -79,7 +85,7 @@ export function DashboardPage() {
           title="منتجات نفدت من المخزون"
           linkLabel="عرض المنتجات"
         >
-          <p className="text-2xl font-black text-gray-800">{outOfStock?.totalCount ?? 0}</p>
+          {isLoadingOutOfStock ? <NumberSkeleton /> : <p className="text-2xl font-black text-gray-800">{outOfStock?.totalCount ?? 0}</p>}
           <p className="text-xs text-gray-400 mt-1">منتج يحتاج إعادة توريد فوراً</p>
         </WidgetCard>
 
@@ -90,7 +96,7 @@ export function DashboardPage() {
           title="اقترب نفاده من المخزون"
           linkLabel="عرض المنتجات"
         >
-          <p className="text-2xl font-black text-gray-800">{lowStock?.totalCount ?? 0}</p>
+          {isLoadingLowStock ? <NumberSkeleton /> : <p className="text-2xl font-black text-gray-800">{lowStock?.totalCount ?? 0}</p>}
           {lowStock && lowStock.items.length > 0 && (
             <p className="text-xs text-gray-400 mt-1 truncate">
               منها: {lowStock.items.slice(0, 3).map((p) => p.name).join('، ')}
@@ -105,7 +111,7 @@ export function DashboardPage() {
           title="تذاكر صيانة تجاوزت الموعد"
           linkLabel="عرض التذاكر"
         >
-          <p className="text-2xl font-black text-gray-800">{overdueTickets.length}</p>
+          {isLoadingMaintenance ? <NumberSkeleton /> : <p className="text-2xl font-black text-gray-800">{overdueTickets.length}</p>}
           {overdueTickets.length > 0 && (
             <p className="text-xs text-gray-400 mt-1 truncate">
               منها: {overdueTickets.slice(0, 3).map((t) => t.customerName).join('، ')}

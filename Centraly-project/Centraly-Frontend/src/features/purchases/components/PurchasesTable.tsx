@@ -1,4 +1,5 @@
 import { formatCurrency } from '@/shared/utils/currency';
+import { formatDateTime } from '@/shared/utils/date';
 import { PurchaseInvoiceResponse } from '../schemas/purchaseSchemas';
 import { PaginatedList } from '@/shared/types/pagination';
 import { DataTable } from '@/shared/components/ui/DataTable';
@@ -32,19 +33,19 @@ export function PurchasesTable({
     {
       header: 'التاريخ',
       cell: (row: PurchaseInvoiceResponse) => (
-        <span dir="ltr">{new Intl.DateTimeFormat('ar-EG', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(row.invoiceDate))}</span>
+        <span dir="ltr">{formatDateTime(row.invoiceDate)}</span>
       ),
     },
     {
       header: 'المورد',
       cell: (row: PurchaseInvoiceResponse) => (
-        <span className="font-bold text-gray-900">{row.supplier?.name || '-'}</span>
+        <span className="font-medium text-gray-900">{row.supplier?.name || '-'}</span>
       ),
     },
     {
       header: 'الإجمالي',
       cell: (row: PurchaseInvoiceResponse) => (
-        <span className="font-bold text-gray-900">
+        <span className="font-semibold text-gray-900">
           {formatCurrency(row.totalAmount)}
         </span>
       ),
@@ -52,7 +53,7 @@ export function PurchasesTable({
     {
       header: 'المدفوع',
       cell: (row: PurchaseInvoiceResponse) => (
-        <span className="text-green-600 font-bold">
+        <span className="text-green-600 font-semibold">
           {formatCurrency(row.paidAmount)}
         </span>
       ),
@@ -60,7 +61,7 @@ export function PurchasesTable({
     {
       header: 'المتبقي',
       cell: (row: PurchaseInvoiceResponse) => (
-        <span className={`${row.remainingAmount > 0 ? 'text-red-600' : 'text-gray-900'} font-bold`}>
+        <span className={`${row.remainingAmount > 0 ? 'text-red-600' : 'text-gray-900'} font-semibold`}>
           {formatCurrency(row.remainingAmount)}
         </span>
       ),
@@ -79,6 +80,7 @@ export function PurchasesTable({
       onNextPage={onNextPage}
       onPrevPage={onPrevPage}
       onRowClick={onRowClick}
+      emptyEntity="فواتير مشتريات"
     />
   );
 }

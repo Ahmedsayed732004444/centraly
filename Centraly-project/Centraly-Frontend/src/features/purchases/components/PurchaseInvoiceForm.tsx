@@ -13,6 +13,7 @@ interface PurchaseInvoiceFormProps {
 export function PurchaseInvoiceForm({ onSubmit, isSubmitting }: PurchaseInvoiceFormProps) {
   const methods = useForm<CreatePurchaseInvoiceRequest>({
     resolver: zodResolver(createPurchaseInvoiceSchema),
+    mode: 'onBlur',
     defaultValues: {
       supplierId: '',
       paidAmount: 0,

@@ -2,7 +2,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useHeaderStore } from '@/shared/hooks/useHeaderStore';
 import { useSupplierReturn } from '../hooks/useSupplierReturns';
-import { AlertCircle, Building2, ChevronLeft, Package, Clock } from 'lucide-react';
+import { AlertCircle, Building2, ChevronLeft, Clock } from 'lucide-react';
+import { EntityImage } from '@/shared/components/ui/EntityImage';
+import { formatDateTime } from '@/shared/utils/date';
 import { tokens } from '@/shared/styles/tokens';
 import { formatCurrency } from '@/shared/utils/currency';
 import { Spinner } from '@/shared/components/ui/Spinner';
@@ -51,7 +53,7 @@ export function SupplierReturnDetailsPage() {
         <div className="flex items-center gap-3 flex-wrap">
           <span className="text-gray-500 text-sm flex items-center gap-1.5">
             <Clock size={16} />
-            {new Intl.DateTimeFormat('ar-EG', { dateStyle: 'full', timeStyle: 'short' }).format(new Date(returnData.returnDate))}
+            {formatDateTime(returnData.returnDate)}
           </span>
           <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full ${RETURN_REASON_COLORS[returnData.reason] || RETURN_REASON_COLORS[3]}`}>
             {RETURN_REASON_LABELS[returnData.reason] || 'سبب غير معروف'}
@@ -105,7 +107,7 @@ export function SupplierReturnDetailsPage() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-right text-sm">
             <thead>
-              <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide border-b border-gray-100">
+              <tr className="text-gray-500 text-xs border-b border-gray-100">
                 <th className="px-5 py-3 font-semibold whitespace-nowrap">الصنف</th>
                 <th className="px-5 py-3 font-semibold text-center whitespace-nowrap">الكمية</th>
                 <th className="px-5 py-3 font-semibold text-center whitespace-nowrap">سعر الإرجاع (للوحدة)</th>
@@ -117,17 +119,7 @@ export function SupplierReturnDetailsPage() {
                 <tr key={item.supplierReturnItemId ?? index} className="hover:bg-gray-50 transition-colors">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      {item.product?.imageUrl ? (
-                        <img
-                          src={item.product.imageUrl}
-                          alt={item.product.name ?? ''}
-                          className="w-10 h-10 rounded-lg object-cover border border-gray-100 shrink-0"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 shrink-0">
-                          <Package size={18} />
-                        </div>
-                      )}
+                      <EntityImage name={item.product?.name || '?'} imageUrl={item.product?.imageUrl} size="sm" />
                       <div>
                         <p className="font-semibold text-gray-800">{item.product?.name || '—'}</p>
                         {item.product?.barcode && (

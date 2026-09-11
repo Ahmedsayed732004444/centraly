@@ -28,7 +28,7 @@ export function PurchaseInvoiceItemsTable({ items, totalAmount }: PurchaseInvoic
       <div className="overflow-x-auto">
         <table className="w-full min-w-[640px] text-right text-sm">
           <thead>
-            <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide border-b border-gray-100">
+            <tr className="text-gray-500 text-xs border-b border-gray-100">
               <th className="px-5 py-3 font-semibold whitespace-nowrap">الصنف</th>
               <th className="px-5 py-3 font-semibold text-center whitespace-nowrap">الكمية</th>
               <th className="px-5 py-3 font-semibold text-center whitespace-nowrap">سعر الشراء (للوحدة)</th>

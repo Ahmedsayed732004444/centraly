@@ -75,6 +75,19 @@ export function useAuth() {
   return context;
 }
 
+// Where each role lands right after login, instead of everyone seeing the manager-facing
+// dashboard first. A user can hold more than one role, so this is priority order, not a
+// lookup: Admin/Manager always get the dashboard even if also flagged Salesperson, etc.
+function resolvePostLoginPath(roles: string[]): string {
+  if (roles.includes('Admin') || roles.includes('Manager')) return '/';
+  // The live role is named "Sales" in this database (not the "Salesperson" name the
+  // rest of the app's role-gating checks for) - matching both here so this redirect
+  // works regardless of which name ends up being the long-term one.
+  if (roles.includes('Salesperson') || roles.includes('Sales')) return '/sales/pos';
+  if (roles.includes('Technician')) return '/maintenance';
+  return '/';
+}
+
 export function useLogin() {
   return useMutation({
     mutationFn: (data: LoginFormData) => authRepository.login(data),
@@ -84,13 +97,13 @@ export function useLogin() {
       if (data.refreshToken) {
         storage.setRefreshToken(data.refreshToken);
       }
-      
+
       const perms = data.permissions || [];
       const userRoles = data.role || [];
       storage.setPermissions(perms);
       storage.setRoles(userRoles);
-      
-      window.location.href = '/';
+
+      window.location.href = resolvePostLoginPath(userRoles);
     },
     onError: (error: unknown) => {
       toast.error(getApiErrorMessage(error, "فشل تسجيل الدخول. تأكد من البيانات."));

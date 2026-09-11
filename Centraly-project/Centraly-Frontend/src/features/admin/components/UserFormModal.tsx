@@ -20,6 +20,7 @@ export function UserFormModal({ isOpen, onClose, userId }: UserFormModalProps) {
   const updateMutation = useUpdateUser();
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm<UserFormData>({
     resolver: zodResolver(userFormSchema),
+    mode: 'onBlur',
     defaultValues: { username: '', password: '', roles: [] }
   });
   useEffect(() => {

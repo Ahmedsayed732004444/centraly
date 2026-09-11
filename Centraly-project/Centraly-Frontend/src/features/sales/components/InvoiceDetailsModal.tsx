@@ -80,7 +80,7 @@ export function InvoiceDetailsModal({ isOpen, onClose, invoiceId }: InvoiceDetai
               </h3>
               <div className="border border-[var(--color-border)] rounded-xl overflow-x-auto">
                 <table className="w-full min-w-[480px] text-right text-sm">
-                  <thead className="bg-[var(--color-page-bg)] border-b border-[var(--color-border)] text-[var(--color-text-muted)] font-semibold">
+                  <thead className="border-b border-[var(--color-border)] text-[var(--color-text-muted)] font-semibold text-xs">
                     <tr>
                       <th className="px-4 py-3">المنتج</th>
                       <th className="px-4 py-3">الكمية</th>
