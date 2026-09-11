@@ -13,16 +13,21 @@ export const NOTIFICATION_KEYS = {
 };
 
 export function useNotificationList(filters: NotificationFilters) {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: NOTIFICATION_KEYS.list(filters),
     queryFn: () => notificationRepository.getAll(filters),
+    enabled: isAuthenticated,
   });
 }
 
 export function useUnreadCount() {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: NOTIFICATION_KEYS.unreadCount,
     queryFn: () => notificationRepository.getUnreadCount(),
+    enabled: isAuthenticated,
+    refetchInterval: 30_000,
   });
 }
 
@@ -87,7 +92,12 @@ export function useNotificationSocket() {
       });
     };
 
+    const handleReconnect = () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    };
+
     connection.on("ReceiveNotification", handleNotification);
+    connection.onreconnected(handleReconnect);
 
     if (connection.state === "Disconnected") {
       connection.start().catch((err) => console.error("SignalR connection failed", err));

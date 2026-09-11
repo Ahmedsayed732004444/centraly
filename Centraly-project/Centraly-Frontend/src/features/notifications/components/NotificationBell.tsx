@@ -10,9 +10,11 @@ export function NotificationBell() {
   return (
     <>
       <button
+        type="button"
         onClick={() => setIsOpen(true)}
+        title="التنبيهات"
         aria-label={unreadCount > 0 ? `التنبيهات (${unreadCount} غير مقروء)` : "التنبيهات"}
-        className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+        className="relative p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
       >
         <Bell className="w-5 h-5 md:w-6 md:h-6" />
         {unreadCount > 0 && (
